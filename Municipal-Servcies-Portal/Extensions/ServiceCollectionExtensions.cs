@@ -20,11 +20,12 @@ namespace Municipal_Servcies_Portal.Extensions
 
             // 3. Specific Repositories
             services.AddScoped<IIssueRepository, IssueRepository>();
+            services.AddScoped<IEventRepository, EventRepository>();
 
             // 4. AutoMapper
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-            // 5. Services
+            // 5. Application Services
             services.AddScoped<IIssueService, IssueService>();
             services.AddScoped<ILocalEventsService, LocalEventsService>();
             services.AddScoped<SearchHistoryService>();
