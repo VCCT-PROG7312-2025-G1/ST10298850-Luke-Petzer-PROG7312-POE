@@ -21,6 +21,24 @@ namespace Municipal_Servcies_Portal.Mapping
 
             // Map from Issue to IssueViewModel for display
             CreateMap<Issue, IssueViewModel>();
+            
+            
+            // Event mappings (Phase 2)
+            CreateMap<Event, LocalEventsViewModel>()
+                .ForMember(dest => dest.EventDate, opt => opt.MapFrom(src => src.StartDate))
+                .ForMember(dest => dest.EventEndDate, opt => opt.MapFrom(src => src.EndDate))
+                .ForMember(dest => dest.SearchTerm, opt => opt.Ignore())
+                .ForMember(dest => dest.StartDate, opt => opt.Ignore())
+                .ForMember(dest => dest.EndDate, opt => opt.Ignore())
+                .ForMember(dest => dest.Events, opt => opt.Ignore())
+                .ForMember(dest => dest.Announcements, opt => opt.Ignore())
+                .ForMember(dest => dest.Categories, opt => opt.Ignore())
+                .ForMember(dest => dest.RecommendedEvents, opt => opt.Ignore());
+
+            CreateMap<LocalEventsViewModel, Event>()
+                .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.EventDate))
+                .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EventEndDate))
+                .ForMember(dest => dest.IsActive, opt => opt.Ignore());
         }
     }
 }
