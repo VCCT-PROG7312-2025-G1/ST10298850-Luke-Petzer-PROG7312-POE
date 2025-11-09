@@ -21,7 +21,8 @@ builder.Services.AddHttpContextAccessor();
 
 // Add DbContext with SQL Server
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("MunicipalDB")));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
 // Register IssueService as Scoped (requires DbContext)
 builder.Services.AddScoped<IssueService>();
