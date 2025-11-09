@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Municipal_Servcies_Portal.Data;
+using Municipal_Servcies_Portal.Repositories;
 using Municipal_Servcies_Portal.Services;
 
 namespace Municipal_Servcies_Portal.Extensions
@@ -14,13 +15,17 @@ namespace Municipal_Servcies_Portal.Extensions
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
 
-            // 2. Generic Repository (commented out until we create Repository classes)
-            // services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            // 2. Generic Repository
+            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
-            // 3. AutoMapper
+            // 3. Specific Repositories
+            services.AddScoped<IIssueRepository, IssueRepository>();
+
+            // 4. AutoMapper
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-            // 4. Existing Services
+            // 5. Services
+            services.AddScoped<IIssueService, IssueService>();
             services.AddScoped<ILocalEventsService, LocalEventsService>();
             services.AddScoped<SearchHistoryService>();
 
