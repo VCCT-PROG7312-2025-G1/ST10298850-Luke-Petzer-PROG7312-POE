@@ -8,20 +8,19 @@ namespace Municipal_Servcies_Portal.Mapping
     {
         public MappingProfile()
         {
-            // Add mappings as you create ViewModels
-            // Examples for when you need them:
-            
-            // Issue mappings
-            // CreateMap<Issue, IssueViewModel>().ReverseMap();
-            
-            // Events mappings
-            // CreateMap<Events, EventViewModel>().ReverseMap();
-            
-            // LocalEvents mappings (you already have this ViewModel)
-            // CreateMap<Event, LocalEventsViewModel>()
-            //     .ForMember(dest => dest.Events, opt => opt.Ignore())
-            //     .ForMember(dest => dest.Categories, opt => opt.Ignore())
-            //     .ForMember(dest => dest.RecommendedSearches, opt => opt.Ignore());
+            // Map from IssueCreateViewModel to Issue
+            CreateMap<IssueCreateViewModel, Issue>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Status, opt => opt.Ignore())
+                .ForMember(dest => dest.DateReported, opt => opt.Ignore())
+                .ForMember(dest => dest.AttachmentPathsJson, opt => opt.Ignore())
+                .ForMember(dest => dest.AttachmentPaths, opt => opt.Ignore())
+                .ForMember(dest => dest.LastUpdated, opt => opt.Ignore())
+                .ForMember(dest => dest.AssignedTo, opt => opt.Ignore())
+                .ForMember(dest => dest.IsActive, opt => opt.Ignore());
+
+            // Map from Issue to IssueViewModel for display
+            CreateMap<Issue, IssueViewModel>();
         }
     }
 }
