@@ -1,0 +1,171 @@
+@model List<Municipal_Servcies_Portal.ViewModels.ServiceRequestListViewModel>
+@{
+    ViewData["Title"] = "Service Request Status";
+}
+
+<link rel="stylesheet" href="~/css/servicerequest.css" />
+
+<div class="service-request">
+    <!-- Header Section -->
+    <header class="service-request__header">
+        <nav class="service-request__breadcrumb" aria-label="Breadcrumb">
+            <a href="/" class="service-request__breadcrumb-link">Home</a>
+            <span class="service-request__breadcrumb-separator">
+                <svg width="8" height="12" viewBox="0 0 8 12" fill="none">
+                    <path d="M2 2l4 4-4 4" stroke="#6B7280" stroke-width="2" fill="none"/>
+                </svg>
+            </span>
+            <a href="/ServiceRequest" class="service-request__breadcrumb-link service-request__breadcrumb-link--active">Service Requests</a>
+        </nav>
+        
+        <h1 class="service-request__title">Service Request Status</h1>
+        <p class="service-request__description">Track the progress of all reported issues and service requests</p>
+    </header>
+
+    <!-- Actions Bar -->
+    <div class="service-request__actions">
+        <div class="service-request__actions-left">
+            <span class="service-request__count">
+                Total Requests: <span class="service-request__count-number">@(Model?.Count ?? 0)</span>
+            </span>
+        </div>
+        <div class="service-request__actions-right">
+            <a href="/ServiceRequest/PriorityQueue" class="service-request__button">
+                <span class="service-request__button-icon">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M8 2L10.5 7H5.5L8 2Z"/>
+                        <path d="M3 9H13V11H3V9Z"/>
+                        <path d="M4 12H12V14H4V12Z"/>
+                    </svg>
+                </span>
+                <span>Sort by Priority</span>
+            </a>
+            <a href="/Issue/Create" class="service-request__button service-request__button--primary">
+                <span class="service-request__button-icon">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M8 2V14M2 8H14" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </span>
+                <span>Report New Issue</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Status Filters -->
+    <div class="service-request__filters">
+        <a href="/ServiceRequest" class="service-request__filter service-request__filter--active">All</a>
+        <a href="/ServiceRequest?status=Pending" class="service-request__filter">Pending</a>
+        <a href="/ServiceRequest?status=InProgress" class="service-request__filter">In Progress</a>
+        <a href="/ServiceRequest?status=Completed" class="service-request__filter">Completed</a>
+        <a href="/ServiceRequest?status=Cancelled" class="service-request__filter">Cancelled</a>
+    </div>
+
+    <!-- Error Message Display -->
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div style="background: #FEE2E2; border: 1px solid #EF4444; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+            <strong style="color: #991B1B;">Error:</strong> <span style="color: #7F1D1D;">@ViewBag.ErrorMessage</span>
+        </div>
+    }
+
+    <!-- Requests Table -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="service-request__table-container">
+            <table class="service-request__table">
+                <thead class="service-request__table-header">
+                    <tr>
+                        <th class="service-request__table-header-cell">ID</th>
+                        <th class="service-request__table-header-cell">Category</th>
+                        <th class="service-request__table-header-cell">Location</th>
+                        <th class="service-request__table-header-cell">Status</th>
+                        <th class="service-request__table-header-cell">Priority</th>
+                        <th class="service-request__table-header-cell">Date Reported</th>
+                        <th class="service-request__table-header-cell">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var request in Model)
+                    {
+                        <tr class="service-request__table-body-row">
+                            <td class="service-request__table-cell service-request__table-cell--id">
+                                <a href="/ServiceRequest/Details/@request.Id" class="service-request__table-link">
+                                    #@request.Id
+                                </a>
+                            </td>
+                            <td class="service-request__table-cell">
+                                @request.Category
+                            </td>
+                            <td class="service-request__table-cell">
+                                @request.Location
+                            </td>
+                            <td class="service-request__table-cell">
+                                @{
+                                    var statusClass = request.Status?.ToLower() switch
+                                    {
+                                        "pending" => "service-request__status--pending",
+                                        "inprogress" => "service-request__status--inprogress",
+                                        "completed" => "service-request__status--completed",
+                                        "cancelled" => "service-request__status--cancelled",
+                                        _ => "service-request__status--pending"
+                                    };
+                                }
+                                <span class="service-request__status @statusClass">
+                                    @request.Status
+                                </span>
+                            </td>
+                            <td class="service-request__table-cell">
+                                <span class="service-request__priority service-request__priority--@request.Priority">
+                                    <span class="service-request__priority-dot"></span>
+                                    <span>
+                                        @switch (request.Priority)
+                                        {
+                                            case 1: <text>Critical</text>
+                                                break;
+                                            case 2: <text>High</text>
+                                                break;
+                                            case 3: <text>Medium</text>
+                                                break;
+                                            case 4: <text>Low</text>
+                                                break;
+                                            case 5: <text>Very Low</text>
+                                                break;
+                                            default: <text>Medium</text>
+                                                break;
+                                        }
+                                    </span>
+                                </span>
+                            </td>
+                            <td class="service-request__table-cell">
+                                @request.DateReported.ToString("MMM dd, yyyy")
+                            </td>
+                            <td class="service-request__table-cell">
+                                <a href="/ServiceRequest/Details/@request.Id" class="service-request__table-link">
+                                    View Details
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <!-- Empty State -->
+        <div class="service-request__table-container">
+            <div class="service-request__empty">
+                <div class="service-request__empty-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2">
+                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+                <h3 class="service-request__empty-title">No service requests found</h3>
+                <p class="service-request__empty-description">
+                    There are currently no service requests to display. Report an issue to get started.
+                </p>
+            </div>
+        </div>
+    }
+</div>
+
