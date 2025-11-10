@@ -22,18 +22,22 @@ namespace Municipal_Servcies_Portal.Data
                 await context.SaveChangesAsync();
             }
             
-            // Check if data already exists
-            var alreadySeeded = await context.Events.AnyAsync() || 
-                               await context.Announcements.AnyAsync() || 
-                               await context.Issues.AnyAsync();
+            // Check if service requests with dependencies already exist (for testing POE data structures)
+            var serviceRequestsSeeded = await context.Issues
+                .AnyAsync(i => i.DependenciesJson != null && i.DependenciesJson != "");
             
-            if (alreadySeeded)
+            if (!serviceRequestsSeeded)
             {
-                return; // Database already seeded
+                // Only seed service requests if they don't exist yet
+                await SeedServiceRequestsAsync(context);
             }
             
-            // Seed Service Requests (Issues) with various priorities, statuses, and dependencies
-            await SeedServiceRequestsAsync(context);
+            // Check if events/announcements already seeded
+            var eventsSeeded = await context.Events.AnyAsync();
+            if (eventsSeeded)
+            {
+                return; // Don't duplicate events/announcements
+            }
 
             // Seed Events
             var events = new List<Event>
