@@ -29,6 +29,10 @@ namespace Municipal_Servcies_Portal.Extensions
             services.AddScoped<IIssueService, IssueService>();
             services.AddScoped<ILocalEventsService, LocalEventsService>();
             services.AddScoped<SearchHistoryService>();
+            
+            // Service Request Service (Phase 3)
+            services.AddScoped<IServiceRequestService, ServiceRequestService>();
+            
 
             return services;
         }
