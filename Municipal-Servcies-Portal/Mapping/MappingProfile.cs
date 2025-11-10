@@ -39,6 +39,14 @@ namespace Municipal_Servcies_Portal.Mapping
                 .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.EventDate))
                 .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EventEndDate))
                 .ForMember(dest => dest.IsActive, opt => opt.Ignore());
+
+            // Phase 3: Service Request mappings
+            CreateMap<Issue, ServiceRequestListViewModel>();
+
+            CreateMap<Issue, ServiceRequestDetailViewModel>()
+                .ForMember(dest => dest.AttachmentPaths, opt => opt.MapFrom(src => src.AttachmentPaths))
+                .ForMember(dest => dest.DependencyIssues, opt => opt.Ignore());
+            
         }
     }
 }
