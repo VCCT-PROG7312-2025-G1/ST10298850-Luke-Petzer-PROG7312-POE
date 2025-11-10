@@ -43,13 +43,19 @@ namespace Municipal_Servcies_Portal.Services
         /// </summary>
         public async Task InitializeAsync()
         {
+            Console.WriteLine("Loading service requests from database..."); // DEBUG
+            
             _allIssues = (await _issueRepository.GetAllAsync()).ToList();
+            
+            Console.WriteLine($"Loaded {_allIssues.Count} issues"); // DEBUG
 
-            // Clear existing data
+            // Clear existing data structures before populating
             _bst.Clear();
             _heap.Clear();
             _graph.Clear();
 
+            Console.WriteLine("Building data structures..."); // DEBUG
+            
             foreach (var issue in _allIssues)
             {
                 // Load into BST for fast lookup by ID (O(log n))
@@ -60,11 +66,19 @@ namespace Municipal_Servcies_Portal.Services
 
                 // Load into Graph for dependency tracking
                 _graph.AddVertex(issue.Id);
-                foreach (var depId in issue.Dependencies)
+                
+                // Add edges for dependencies if they exist
+                if (issue.Dependencies != null && issue.Dependencies.Any())
                 {
-                    _graph.AddEdge(issue.Id, depId);
+                    foreach (var depId in issue.Dependencies)
+                    {
+                        _graph.AddEdge(issue.Id, depId);
+                        Console.WriteLine($"Added dependency edge: {issue.Id} -> {depId}"); // DEBUG
+                    }
                 }
             }
+            
+            Console.WriteLine("Data structures initialized successfully"); // DEBUG
         }
 
         public async Task<List<ServiceRequestListViewModel>> GetAllRequestsAsync()
@@ -75,44 +89,82 @@ namespace Municipal_Servcies_Portal.Services
 
         public async Task<ServiceRequestDetailViewModel?> GetRequestDetailsAsync(int id)
         {
+            // Make sure data structures are loaded
             await EnsureInitializedAsync();
 
-            // Use BST for O(log n) retrieval (POE requirement)
+            Console.WriteLine($"Searching for issue #{id} using BST..."); // DEBUG
+            
+            // Use BST to find the issue quickly (O(log n) instead of O(n))
             var issue = _bst.Search(id);
 
             if (issue == null)
-                return null;
+            {
+                Console.WriteLine($"Issue #{id} not found"); // DEBUG
+                return null; // Not found
+            }
 
-            var viewModel = _mapper.Map<ServiceRequestDetailViewModel>(issue);
+            Console.WriteLine($"Found issue #{id}: {issue.Description}"); // DEBUG
+            
+            // Convert to view model for the view
+            var details = _mapper.Map<ServiceRequestDetailViewModel>(issue);
 
-            // Use Graph for dependency traversal (POE requirement)
-            var dependencyIds = _graph.BreadthFirstSearch(id).Skip(1).ToList(); // Skip self
-            viewModel.DependencyIssues = _allIssues
-                .Where(i => dependencyIds.Contains(i.Id))
-                .ToList();
+            // Find related issues using Graph BFS traversal
+            Console.WriteLine($"Finding dependencies for issue #{id}..."); // DEBUG
+            var relatedIds = _graph.BreadthFirstSearch(id);
+            
+            // Remove the first item (the issue itself)
+            if (relatedIds.Count > 0)
+                relatedIds.RemoveAt(0);
 
-            return viewModel;
+            // Get the actual issue objects for the dependencies
+            var dependencies = new List<Issue>();
+            foreach (var depId in relatedIds)
+            {
+                var depIssue = _allIssues.FirstOrDefault(i => i.Id == depId);
+                if (depIssue != null)
+                {
+                    dependencies.Add(depIssue);
+                    Console.WriteLine($"  - Dependency found: #{depId}"); // DEBUG
+                }
+            }
+            
+            details.DependencyIssues = dependencies;
+            
+            Console.WriteLine($"Total dependencies: {dependencies.Count}"); // DEBUG
+
+            return details;
         }
 
         public async Task<List<ServiceRequestListViewModel>> GetRequestsByPriorityAsync()
         {
             await EnsureInitializedAsync();
 
+            Console.WriteLine("Sorting issues by priority using MinHeap..."); // DEBUG
+            
             // Re-create a copy of the heap to extract from it
+            // We can't reuse the original heap because ExtractMin removes items
             var priorityHeap = new MinHeap<Issue>();
             foreach (var issue in _allIssues)
             {
                 priorityHeap.Insert(issue.Priority, issue);
             }
 
+            Console.WriteLine($"Heap contains {priorityHeap.Count} items"); // DEBUG
+            
+            // Extract all items in priority order (lowest priority number first)
             var sortedIssues = new List<Issue>();
             while (priorityHeap.Count > 0)
             {
                 var minIssue = priorityHeap.ExtractMin();
                 if (minIssue != null)
+                {
                     sortedIssues.Add(minIssue);
+                    Console.WriteLine($"Extracted: Priority {minIssue.Priority} - Issue #{minIssue.Id}"); // DEBUG
+                }
             }
 
+            Console.WriteLine("Sorting complete"); // DEBUG
+            
             return _mapper.Map<List<ServiceRequestListViewModel>>(sortedIssues);
         }
 
