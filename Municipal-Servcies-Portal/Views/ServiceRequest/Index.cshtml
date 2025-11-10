@@ -53,12 +53,31 @@
 
     <!-- Status Filters -->
     <div class="service-request__filters">
-        <a href="/ServiceRequest" class="service-request__filter service-request__filter--active">All</a>
-        <a href="/ServiceRequest?status=Pending" class="service-request__filter">Pending</a>
-        <a href="/ServiceRequest?status=InProgress" class="service-request__filter">In Progress</a>
-        <a href="/ServiceRequest?status=Completed" class="service-request__filter">Completed</a>
-        <a href="/ServiceRequest?status=Cancelled" class="service-request__filter">Cancelled</a>
+        @{
+            var currentFilter = ViewBag.CurrentFilter as string;
+        }
+        <a href="/ServiceRequest" 
+           class="service-request__filter @(string.IsNullOrEmpty(currentFilter) ? "service-request__filter--active" : "")">
+            All
+        </a>
+        <a href="/ServiceRequest?status=Pending" 
+           class="service-request__filter @(currentFilter == "Pending" ? "service-request__filter--active" : "")">
+            Pending
+        </a>
+        <a href="/ServiceRequest?status=InProgress" 
+           class="service-request__filter @(currentFilter == "InProgress" ? "service-request__filter--active" : "")">
+            In Progress
+        </a>
+        <a href="/ServiceRequest?status=Completed" 
+           class="service-request__filter @(currentFilter == "Completed" ? "service-request__filter--active" : "")">
+            Completed
+        </a>
+        <a href="/ServiceRequest?status=Cancelled" 
+           class="service-request__filter @(currentFilter == "Cancelled" ? "service-request__filter--active" : "")">
+            Cancelled
+        </a>
     </div>
+
 
     <!-- Error Message Display -->
     @if (ViewBag.ErrorMessage != null)
