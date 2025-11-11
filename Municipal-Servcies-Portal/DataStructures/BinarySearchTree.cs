@@ -2,7 +2,6 @@ namespace Municipal_Servcies_Portal.DataStructures
 {
     // Binary Search Tree for fast searching
     // This helps find service requests quickly by ID
-    // Based on lecture notes from data structures class
     public class BinarySearchTree<T>
     {
         // Internal node structure for the tree
