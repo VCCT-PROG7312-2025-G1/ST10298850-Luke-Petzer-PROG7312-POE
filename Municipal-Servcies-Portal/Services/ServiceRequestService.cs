@@ -175,5 +175,105 @@ namespace Municipal_Servcies_Portal.Services
             var dependencyIds = _graph.BreadthFirstSearch(id).Skip(1).ToList();
             return _allIssues.Where(i => dependencyIds.Contains(i.Id)).ToList();
         }
+        
+        /// <summary>
+        /// Search for service requests using multiple strategies
+        /// </summary>
+        public async Task<ServiceRequestSearchViewModel> SearchRequestsAsync(string? searchTerm, string? category)
+        {
+            await EnsureInitializedAsync();
+            
+            Console.WriteLine($"Search started - Term: '{searchTerm}', Category: '{category}'"); // DEBUG
+            
+            var results = _allIssues.AsQueryable();
+            
+            // STRATEGY 1: Search by ID using BST (fast O(log n) lookup)
+            if (!string.IsNullOrWhiteSpace(searchTerm) && int.TryParse(searchTerm.Trim(), out int searchId))
+            {
+                Console.WriteLine($"Searching for ID {searchId} using BST..."); // DEBUG
+                var issue = _bst.Search(searchId);
+                
+                if (issue != null)
+                {
+                    Console.WriteLine($"Found issue #{searchId}"); // DEBUG
+                    // Found exact ID match using BST
+                    return new ServiceRequestSearchViewModel
+                    {
+                        Results = new List<ServiceRequestListViewModel> 
+                        { 
+                            _mapper.Map<ServiceRequestListViewModel>(issue) 
+                        },
+                        SearchTerm = searchTerm,
+                        CategoryFilter = category,
+                        AvailableCategories = await GetAllCategoriesAsync(),
+                        TotalResults = 1
+                    };
+                }
+                else
+                {
+                    Console.WriteLine($"Issue #{searchId} not found"); // DEBUG
+                    // ID not found
+                    return new ServiceRequestSearchViewModel
+                    {
+                        Results = new List<ServiceRequestListViewModel>(),
+                        SearchTerm = searchTerm,
+                        CategoryFilter = category,
+                        AvailableCategories = await GetAllCategoriesAsync(),
+                        TotalResults = 0
+                    };
+                }
+            }
+            
+            // STRATEGY 2: Text search in multiple fields (O(n) but simple)
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var term = searchTerm.Trim().ToLower();
+                Console.WriteLine($"Text search for: '{term}'"); // DEBUG
+                
+                results = results.Where(i =>
+                    (i.Category != null && i.Category.ToLower().Contains(term)) ||
+                    (i.Location != null && i.Location.ToLower().Contains(term)) ||
+                    (i.Description != null && i.Description.ToLower().Contains(term))
+                );
+            }
+            
+            // STRATEGY 3: Category filter (O(n))
+            if (!string.IsNullOrWhiteSpace(category) && category != "All")
+            {
+                Console.WriteLine($"Filtering by category: '{category}'"); // DEBUG
+                results = results.Where(i => 
+                    i.Category != null && i.Category.Equals(category, StringComparison.OrdinalIgnoreCase)
+                );
+            }
+            
+            // Convert to list and sort by date (most recent first)
+            var filteredIssues = results.OrderByDescending(i => i.DateReported).ToList();
+            
+            Console.WriteLine($"Search complete - {filteredIssues.Count} results found"); // DEBUG
+            
+            return new ServiceRequestSearchViewModel
+            {
+                Results = _mapper.Map<List<ServiceRequestListViewModel>>(filteredIssues),
+                SearchTerm = searchTerm,
+                CategoryFilter = category,
+                AvailableCategories = await GetAllCategoriesAsync(),
+                TotalResults = filteredIssues.Count
+            };
+        }
+        
+        /// <summary>
+        /// Get all unique categories from issues
+        /// </summary>
+        public async Task<List<string>> GetAllCategoriesAsync()
+        {
+            await EnsureInitializedAsync();
+            
+            return _allIssues
+                .Where(i => !string.IsNullOrEmpty(i.Category))
+                .Select(i => i.Category!)
+                .Distinct()
+                .OrderBy(c => c)
+                .ToList();
+        }
     }
 }

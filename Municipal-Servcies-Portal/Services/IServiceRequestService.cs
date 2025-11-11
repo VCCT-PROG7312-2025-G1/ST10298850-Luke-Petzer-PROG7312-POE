@@ -30,5 +30,15 @@ namespace Municipal_Servcies_Portal.Services
         /// Gets all dependencies for a request using Graph BFS.
         /// </summary>
         Task<List<Issue>> GetRequestDependenciesAsync(int id);
+        
+        /// <summary>
+        /// Searches requests by ID (using BST), text, or category filter.
+        /// </summary>
+        Task<ServiceRequestSearchViewModel> SearchRequestsAsync(string? searchTerm, string? category);
+        
+        /// <summary>
+        /// Gets list of all unique categories for filter dropdown.
+        /// </summary>
+        Task<List<string>> GetAllCategoriesAsync();
     }
 }
