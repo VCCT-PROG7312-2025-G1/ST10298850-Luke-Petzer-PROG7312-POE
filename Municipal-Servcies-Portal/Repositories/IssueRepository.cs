@@ -34,5 +34,41 @@ namespace Municipal_Servcies_Portal.Repositories
                 .OrderByDescending(i => i.DateReported)
                 .ToListAsync();
         }
+
+        public async Task<int> GetResolvedIssuesCountAsync()
+        {
+            // Count issues with status "Resolved" or "Completed"
+            return await _dbSet
+                .Where(i => i.IsActive && (i.Status == "Resolved" || i.Status == "Completed"))
+                .CountAsync();
+        }
+
+        public async Task<int> GetActiveIssuesCountAsync()
+        {
+            // Count issues with status "Pending", "In Progress", or "Under Review"
+            return await _dbSet
+                .Where(i => i.IsActive && (i.Status == "Pending" || i.Status == "In Progress" || i.Status == "Under Review"))
+                .CountAsync();
+        }
+
+        public async Task<double> GetAverageResponseTimeInHoursAsync()
+        {
+            // Calculate average time between DateReported and LastUpdated for resolved issues
+            var resolvedIssues = await _dbSet
+                .Where(i => i.IsActive && 
+                           (i.Status == "Resolved" || i.Status == "Completed") && 
+                           i.LastUpdated.HasValue)
+                .Select(i => new { i.DateReported, i.LastUpdated })
+                .ToListAsync();
+
+            if (!resolvedIssues.Any())
+                return 0;
+
+            // Calculate average hours
+            var averageHours = resolvedIssues
+                .Average(i => (i.LastUpdated!.Value - i.DateReported).TotalHours);
+
+            return averageHours;
+        }
     }
 }

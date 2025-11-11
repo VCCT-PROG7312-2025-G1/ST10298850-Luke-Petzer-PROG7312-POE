@@ -7,5 +7,8 @@ namespace Municipal_Servcies_Portal.Repositories
         Task<IEnumerable<Issue>> GetRecentIssuesAsync(int count);
         Task<IEnumerable<Issue>> GetIssuesByCategoryAsync(string category);
         Task<IEnumerable<Issue>> GetIssuesByStatusAsync(string status);
+        Task<int> GetResolvedIssuesCountAsync();
+        Task<int> GetActiveIssuesCountAsync();
+        Task<double> GetAverageResponseTimeInHoursAsync();
     }
 }
