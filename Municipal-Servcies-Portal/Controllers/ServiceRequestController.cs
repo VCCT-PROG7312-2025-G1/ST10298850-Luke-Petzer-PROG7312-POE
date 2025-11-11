@@ -17,67 +17,115 @@ namespace Municipal_Servcies_Portal.Controllers
 
         /// <summary>
         /// GET: ServiceRequest
-        /// Displays list of all service requests.
+        /// Displays list of all service requests with optional search/filter.
+        /// All business logic handled in service layer.
         /// </summary>
-        public async Task<IActionResult> Index(string? status)
+        public async Task<IActionResult> Index()
         {
             try
             {
-                _logger.LogInformation("Loading service requests with status filter: {Status}", status ?? "All");
-        
-                // Get all requests first
-                var requests = await _serviceRequestService.GetAllRequestsAsync();
-        
-                // Filter by status if provided
-                if (!string.IsNullOrEmpty(status))
-                {
-                    // Filter the list based on status
-                    requests = requests.Where(r => 
-                        r.Status?.Equals(status, StringComparison.OrdinalIgnoreCase) == true
-                    ).ToList();
-            
-                    _logger.LogInformation("Filtered to {Count} requests with status: {Status}", 
-                        requests.Count, status);
-                }
-        
-                // Pass the current filter to the view for highlighting active filter
-                ViewBag.CurrentFilter = status;
-        
-                return View(requests);
+                _logger.LogInformation("Loading all service requests");
+                var model = await _serviceRequestService.SearchRequestsAsync(null, null);
+                return View(model);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading service requests");
                 ViewBag.ErrorMessage = "Unable to load service requests. Please try again later.";
-                return View(new List<ServiceRequestListViewModel>());
+                return View(new ServiceRequestSearchViewModel());
             }
+        }
+        
+        /// <summary>
+        /// GET: ServiceRequest/Search
+        /// Handles search and filter requests.
+        /// All business logic handled in service layer.
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> Search(string? searchTerm, string? category)
+        {
+            try
+            {
+                _logger.LogInformation("Search: Term='{SearchTerm}', Category='{Category}'", searchTerm, category);
+                var model = await _serviceRequestService.SearchRequestsAsync(searchTerm, category);
+                return View("Index", model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error searching service requests");
+                ViewBag.ErrorMessage = "Search failed. Please try again.";
+                return View("Index", new ServiceRequestSearchViewModel());
+            }
+        }
+        
+        /// <summary>
+        /// GET: ServiceRequest/ClearSearch
+        /// Clears search filters and returns to full list.
+        /// </summary>
+        [HttpGet]
+        public IActionResult ClearSearch()
+        {
+            return RedirectToAction(nameof(Index));
         }
 
         /// <summary>
         /// GET: ServiceRequest/PriorityQueue
         /// Displays requests sorted by priority using MinHeap.
+        /// All business logic handled in service layer.
         /// </summary>
         public async Task<IActionResult> PriorityQueue()
         {
-            var model = await _serviceRequestService.GetRequestsByPriorityAsync();
-            return View("Index", model); // Reuse Index view
+            try
+            {
+                _logger.LogInformation("Loading priority queue");
+                var model = await _serviceRequestService.GetRequestsByPriorityAsync();
+                
+                // Create search view model wrapper for consistency with Index view
+                var searchViewModel = new ServiceRequestSearchViewModel
+                {
+                    Results = model,
+                    TotalResults = model.Count,
+                    AvailableCategories = await _serviceRequestService.GetAllCategoriesAsync()
+                };
+                
+                return View("Index", searchViewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading priority queue");
+                ViewBag.ErrorMessage = "Unable to load priority queue. Please try again.";
+                return View("Index", new ServiceRequestSearchViewModel());
+            }
         }
 
         /// <summary>
         /// GET: ServiceRequest/Details/5
         /// Displays details for a single request.
         /// Uses BST for lookup and Graph for dependencies.
+        /// All business logic handled in service layer.
         /// </summary>
         public async Task<IActionResult> Details(int id)
         {
-            var model = await _serviceRequestService.GetRequestDetailsAsync(id);
-
-            if (model == null)
+            try
             {
-                return NotFound();
-            }
+                _logger.LogInformation("Loading details for request {Id}", id);
+                var model = await _serviceRequestService.GetRequestDetailsAsync(id);
 
-            return View(model);
+                if (model == null)
+                {
+                    _logger.LogWarning("Request {Id} not found", id);
+                    return NotFound();
+                }
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading request details for {Id}", id);
+                ViewBag.ErrorMessage = "Unable to load request details. Please try again.";
+                return RedirectToAction(nameof(Index));
+            }
         }
     }
 }
+
