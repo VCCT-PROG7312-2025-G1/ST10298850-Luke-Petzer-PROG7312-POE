@@ -1,9 +1,9 @@
-@model List<Municipal_Servcies_Portal.ViewModels.ServiceRequestListViewModel>
+@model Municipal_Servcies_Portal.ViewModels.ServiceRequestSearchViewModel
 @{
     ViewData["Title"] = "Service Request Status";
 }
 
-<link rel="stylesheet" href="~/css/servicerequest.css" />
+<link rel="stylesheet" href="~/css/servicerequest.css" asp-append-version="true" />
 
 <div class="service-request">
     <!-- Header Section -->
@@ -22,11 +22,93 @@
         <p class="service-request__description">Track the progress of all reported issues and service requests</p>
     </header>
 
+    <!-- SEARCH SECTION -->
+    <div class="service-request__search-section">
+        <form method="get" asp-action="Search" id="searchForm" class="service-request__search-form">
+            <div class="service-request__search-row">
+                <!-- Search Input -->
+                <div class="service-request__search-field">
+                    <label for="searchTerm" class="service-request__search-label">
+                        <i class="bi bi-search"></i> Search
+                    </label>
+                    <input 
+                        type="text" 
+                        id="searchTerm"
+                        name="searchTerm" 
+                        class="service-request__search-input" 
+                        placeholder="Search by ID, location, or description...(example., 28)"
+                        value="@Model.SearchTerm"
+                        autocomplete="off"
+                    />
+                </div>
+                
+                <!-- Category Filter -->
+                <div class="service-request__search-field">
+                    <label for="category" class="service-request__search-label">
+                        <i class="bi bi-funnel"></i> Category
+                    </label>
+                    <select 
+                        id="category"
+                        name="category" 
+                        class="service-request__search-select">
+                        <option value="">All Categories</option>
+                        @foreach (var cat in Model.AvailableCategories)
+                        {
+                            <option value="@cat" selected="@(Model.CategoryFilter == cat)">
+                                @cat
+                            </option>
+                        }
+                    </select>
+                </div>
+                
+                <!-- Search Buttons -->
+                <div class="service-request__search-actions">
+                    <button type="submit" class="service-request__button service-request__button--primary">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                    @if (Model.IsFiltered)
+                    {
+                        <a href="@Url.Action("ClearSearch")" class="service-request__button service-request__button--secondary">
+                            <i class="bi bi-x-circle"></i> Clear
+                        </a>
+                    }
+                </div>
+            </div>
+        </form>
+        
+        <!-- Active Filters Display -->
+        @if (Model.IsFiltered)
+        {
+            <div class="service-request__active-filters">
+                <span class="service-request__filter-label">Active Filters:</span>
+                @if (!string.IsNullOrEmpty(Model.SearchTerm))
+                {
+                    <span class="service-request__filter-tag">
+                        <i class="bi bi-search"></i> "@Model.SearchTerm"
+                    </span>
+                }
+                @if (!string.IsNullOrEmpty(Model.CategoryFilter))
+                {
+                    <span class="service-request__filter-tag">
+                        <i class="bi bi-tag"></i> @Model.CategoryFilter
+                    </span>
+                }
+            </div>
+        }
+    </div>
+
     <!-- Actions Bar -->
     <div class="service-request__actions">
         <div class="service-request__actions-left">
             <span class="service-request__count">
-                Total Requests: <span class="service-request__count-number">@(Model?.Count ?? 0)</span>
+                @if (Model.IsFiltered)
+                {
+                    <text>Found: <span class="service-request__count-number">@Model.TotalResults</span></text>
+                }
+                else
+                {
+                    <text>Total Requests: <span class="service-request__count-number">@Model.TotalResults</span></text>
+                }
             </span>
         </div>
         <div class="service-request__actions-right">
@@ -51,44 +133,17 @@
         </div>
     </div>
 
-    <!-- Status Filters -->
-    <div class="service-request__filters">
-        @{
-            var currentFilter = ViewBag.CurrentFilter as string;
-        }
-        <a href="/ServiceRequest" 
-           class="service-request__filter @(string.IsNullOrEmpty(currentFilter) ? "service-request__filter--active" : "")">
-            All
-        </a>
-        <a href="/ServiceRequest?status=Pending" 
-           class="service-request__filter @(currentFilter == "Pending" ? "service-request__filter--active" : "")">
-            Pending
-        </a>
-        <a href="/ServiceRequest?status=InProgress" 
-           class="service-request__filter @(currentFilter == "InProgress" ? "service-request__filter--active" : "")">
-            In Progress
-        </a>
-        <a href="/ServiceRequest?status=Completed" 
-           class="service-request__filter @(currentFilter == "Completed" ? "service-request__filter--active" : "")">
-            Completed
-        </a>
-        <a href="/ServiceRequest?status=Cancelled" 
-           class="service-request__filter @(currentFilter == "Cancelled" ? "service-request__filter--active" : "")">
-            Cancelled
-        </a>
-    </div>
-
-
     <!-- Error Message Display -->
     @if (ViewBag.ErrorMessage != null)
     {
-        <div style="background: #FEE2E2; border: 1px solid #EF4444; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
-            <strong style="color: #991B1B;">Error:</strong> <span style="color: #7F1D1D;">@ViewBag.ErrorMessage</span>
+        <div class="service-request__error">
+            <i class="bi bi-exclamation-triangle"></i>
+            <strong>Error:</strong> <span>@ViewBag.ErrorMessage</span>
         </div>
     }
 
     <!-- Requests Table -->
-    @if (Model != null && Model.Any())
+    @if (Model.TotalResults > 0)
     {
         <div class="service-request__table-container">
             <table class="service-request__table">
@@ -97,70 +152,51 @@
                         <th class="service-request__table-header-cell">ID</th>
                         <th class="service-request__table-header-cell">Category</th>
                         <th class="service-request__table-header-cell">Location</th>
+                        <th class="service-request__table-header-cell">Description</th>
                         <th class="service-request__table-header-cell">Status</th>
                         <th class="service-request__table-header-cell">Priority</th>
                         <th class="service-request__table-header-cell">Date Reported</th>
                         <th class="service-request__table-header-cell">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @foreach (var request in Model)
+                <tbody class="service-request__table-body">
+                    @foreach (var request in Model.Results)
                     {
-                        <tr class="service-request__table-body-row">
+                        <tr class="service-request__table-row">
                             <td class="service-request__table-cell service-request__table-cell--id">
-                                <a href="/ServiceRequest/Details/@request.Id" class="service-request__table-link">
-                                    #@request.Id
-                                </a>
+                                <strong>#@request.Id</strong>
+                                <br />
+                                <small class="text-muted">@request.ReferenceNumber</small>
                             </td>
                             <td class="service-request__table-cell">
-                                @request.Category
+                                <i class="bi bi-tag"></i> @request.Category
                             </td>
                             <td class="service-request__table-cell">
-                                @request.Location
+                                <i class="bi bi-geo-alt"></i> @request.Location
                             </td>
-                            <td class="service-request__table-cell">
-                                @{
-                                    var statusClass = request.Status?.ToLower() switch
-                                    {
-                                        "pending" => "service-request__status--pending",
-                                        "inprogress" => "service-request__status--inprogress",
-                                        "completed" => "service-request__status--completed",
-                                        "cancelled" => "service-request__status--cancelled",
-                                        _ => "service-request__status--pending"
-                                    };
+                            <td class="service-request__table-cell service-request__table-cell--description">
+                                @if (!string.IsNullOrEmpty(request.Description))
+                                {
+                                    @(request.Description.Length > 100 ? request.Description.Substring(0, 100) + "..." : request.Description)
                                 }
-                                <span class="service-request__status @statusClass">
+                            </td>
+                            <td class="service-request__table-cell">
+                                <span class="service-request__badge service-request__badge--@request.Status?.ToLower()">
                                     @request.Status
                                 </span>
                             </td>
                             <td class="service-request__table-cell">
-                                <span class="service-request__priority service-request__priority--@request.Priority">
-                                    <span class="service-request__priority-dot"></span>
-                                    <span>
-                                        @switch (request.Priority)
-                                        {
-                                            case 1: <text>Critical</text>
-                                                break;
-                                            case 2: <text>High</text>
-                                                break;
-                                            case 3: <text>Medium</text>
-                                                break;
-                                            case 4: <text>Low</text>
-                                                break;
-                                            case 5: <text>Very Low</text>
-                                                break;
-                                            default: <text>Medium</text>
-                                                break;
-                                        }
-                                    </span>
+                                <span class="service-request__badge service-request__badge--priority-@request.Priority">
+                                    Priority @request.Priority
                                 </span>
                             </td>
                             <td class="service-request__table-cell">
-                                @request.DateReported.ToString("MMM dd, yyyy")
+                                <i class="bi bi-calendar"></i> @request.DateReported.ToString("MMM dd, yyyy")
                             </td>
-                            <td class="service-request__table-cell">
-                                <a href="/ServiceRequest/Details/@request.Id" class="service-request__table-link">
-                                    View Details
+                            <td class="service-request__table-cell service-request__table-cell--actions">
+                                <a href="@Url.Action("Details", new { id = request.Id })" 
+                                   class="service-request__action-link">
+                                    <i class="bi bi-eye"></i> View
                                 </a>
                             </td>
                         </tr>
@@ -171,20 +207,43 @@
     }
     else
     {
-        <!-- Empty State -->
-        <div class="service-request__table-container">
-            <div class="service-request__empty">
-                <div class="service-request__empty-icon">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2">
-                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                </div>
-                <h3 class="service-request__empty-title">No service requests found</h3>
+        <div class="service-request__empty-state">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            @if (Model.IsFiltered)
+            {
+                <h3 class="service-request__empty-title">No results found</h3>
                 <p class="service-request__empty-description">
-                    There are currently no service requests to display. Report an issue to get started.
+                    Try adjusting your search criteria or filters.
                 </p>
-            </div>
+                <a href="@Url.Action("ClearSearch")" class="service-request__button service-request__button--primary">
+                    <i class="bi bi-arrow-counterclockwise"></i> Clear Filters
+                </a>
+            }
+            else
+            {
+                <h3 class="service-request__empty-title">No service requests yet</h3>
+                <p class="service-request__empty-description">
+                    Get started by reporting your first issue.
+                </p>
+                <a href="/Issue/Create" class="service-request__button service-request__button--primary">
+                    <i class="bi bi-plus-circle"></i> Report Issue
+                </a>
+            }
         </div>
     }
 </div>
+
+@section Scripts {
+    <script>
+        // Optional: Auto-submit on category change
+        document.getElementById('category')?.addEventListener('change', function() {
+            // Uncomment to enable auto-submit
+            // document.getElementById('searchForm').submit();
+        });
+    </script>
+}
 
