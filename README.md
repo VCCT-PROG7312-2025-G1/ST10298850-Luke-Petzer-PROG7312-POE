@@ -1,123 +1,100 @@
 # Municipal Services Portal
 
-A comprehensive web application for reporting municipal issues, discovering local events and announcements, and staying connected with your community. Built with ASP.NET Core MVC and Entity Framework Core.
+> Portfolio of Evidence for PROG7312 - ASP.NET Core MVC Application
 
-## Link to Repository
+This is my Portfolio of Evidence for PROG7312, an ASP.NET Core MVC application for a municipal services portal. The project is built using a clean architecture (MVCS + Repository Pattern) and demonstrates the practical use of advanced data structures.
 
+---
+
+## 📚 Table of Contents
+
+- [Repository & Video Links](#-repository--video-links)
+- [Project Features](#-project-features)
+- [Why SQLite?](#-why-sqlite)
+- [Technologies & Patterns](#-technologies--patterns)
+- [Project Structure](#-project-structure)
+- [Setup & Installation](#-setup--installation)
+- [Usage Guide](#-usage-guide)
+- [Part 3: Data Structures Explained](#-part-3-data-structures-explained)
+
+---
+
+## 🔗 Repository & Video Links
+
+**GitHub Repository:**  
 https://github.com/ST10298850/ST10298850-Luke-Petzer-PROG7312-POE.git
 
-## Link to YouTube Video
-[
-[https://youtu.be/6EByHpbRAZs](https://youtu.be/Y9FKudbk_m0)](https://youtu.be/Y9FKudbk_m0)
+**YouTube Video Demo:**  
+https://youtu.be/Y9FKudbk_m0
 
-## Features
+---
 
-### Report Issues
-- Submit municipal issues (potholes, streetlights, graffiti, etc.) with location, category, and description
-- Attach multiple files (images, PDFs) to reports
-- **Database persistence** - all issues stored in SQLite database
-- Optional progress notifications via email or SMS
-- Unique reference numbers for tracking (format: `#MSP-2025-000001`)
-- Status tracking (Pending, InProgress, Resolved, Closed)
-- Confirmation page with detailed report summary
+## 🎯 Project Features
 
-### Local Events and Announcements
-- **Advanced search and filtering** by event name, category, and date
-- **Intelligent recommendation system** based on user search patterns
-- **Auto-submit filters** with debounced search (700ms delay - no button clicks needed)
-- **Session-based search history** tracking for personalized recommendations
-- View upcoming community events with detailed information and realistic times
-- Municipal announcements sidebar with recent updates
-- **8 event categories**: Government Meetings, Community Events, Public Safety, Parks & Recreation, Cultural Events, Educational Events, Health & Wellness, Holiday Events
-- **Bootstrap Icons** integration for clean, professional UI elements
+This application is built in three main parts:
 
-### Service Request Status (Part 3)
-- **Advanced search and filtering** by ID, text, or category
-- **Binary Search Tree** for O(log n) ID lookups
-- **Min Heap** for priority-based sorting
-- **Graph structure** for dependency tracking and visualization
-- **Three search strategies**:
-  1. Exact ID search using BST (fastest)
-  2. Text search across category, location, description
-  3. Category filter with exact matching
-- View comprehensive table of all service requests
-- Track request status, priority, and dependencies
-- Sort by priority to address critical issues first
-- Active filter badges showing applied search criteria
-- Dynamic result count (Total vs Found)
-- Context-aware empty states
+### 1️⃣ Report Issues
+This feature allows users to submit service requests (like potholes, graffiti, or water leaks) to the municipality. The form collects a location, category, description, and allows for file uploads. All submissions are saved to the database.
 
-### Recommendation Engine
-- **Multi-strategy recommendation algorithm**:
-  1. Category-based recommendations (most frequently searched category)
-  2. Keyword-based recommendations (matching search terms in title/description)
-  3. Fallback to upcoming events
-- Analyzes user search patterns and preferences
-- Tracks last 10 searches per user session
-- Displays top 3 personalized recommendations
-- Session storage with 2-hour timeout
+### 2️⃣ Local Events
+This page displays upcoming events and announcements. I built a search and filter system for this, along with a recommendation feature that suggests other events based on what the user has searched for in their current session.
 
-### Modern UI/UX
-- Responsive design with custom CSS styling
-- **Bootstrap Icons** for consistent iconography
-- Progress bars and loading animations
-- Drag-and-drop file uploads
-- Color-coded event categories (blue, green, orange badges)
-- Clean, accessible navigation
-- BEM CSS naming convention throughout
+### 3️⃣ Track Service Requests (Part 3)
+This is the main feature of the POE. It's a dashboard that allows users to track the status of all submitted issues. It uses several data structures to work efficiently:
 
-## Why SQLite?
+- **Binary Search Tree (BST):** Used for instant lookups when a user searches for a specific issue ID.
+- **Min-Heap:** Used to provide a "Sort by Priority" view, so critical issues (like gas leaks) always appear at the top.
+- **Graph:** Used to model and visualize dependencies between tasks (e.g., "Repave Road" can't start until "Fix Water Main" is complete).
 
-This project uses **SQLite** as the database engine for several key reasons:
+---
 
- **Zero Configuration** - No database server installation required on Windows, macOS, or Linux  
- **Cross-Platform** - Works identically across all operating systems  
- **Perfect for Development** - Ideal for academic projects and demonstrations  
- **Portable** - Single file database makes it easy to backup, share, or reset  
+## 💾 Why SQLite?
 
-**Perfect for this application because:**
-- Supports all Entity Framework Core features used (migrations, relationships, async queries)
-- Eliminates environment setup issues for graders/reviewers
+This project uses **SQLite** as its database. I chose it for several key reasons:
 
+| Advantage | Description |
+|-----------|-------------|
+| **Zero Configuration** | It requires no database server (like SQL Server or MySQL) to be installed. It just works out of the box. |
+| **Cross-Platform** | The project runs identically on Windows, macOS, or Linux. |
+| **Portability** | The entire database is a single file (`municipal_services.db`), which makes it perfect for an academic project. |
+| **No Hassle** | It eliminated any potential setup or environment issues for my lecturer, allowing them to focus on the application's logic. |
 
-## Technologies Used
+---
 
-- **Backend:**
-  - ASP.NET Core MVC (.NET 8)
-  - C# 12
-  - Entity Framework Core 8.0.10
-  - SQLite 3 (Database) - File-based, zero-configuration
-  - Async/Await pattern throughout
+## 🛠️ Technologies & Patterns
 
-- **Frontend:**
-  - Razor Views
-  - Bootstrap 5
-  - Bootstrap Icons 1.11.1 (CDN)
-  - Custom CSS (see `/wwwroot/css/`)
-  - JavaScript (ES6+)
-  - Auto-submit forms with debouncing
+### Core Technologies
+- **Framework:** ASP.NET Core MVC (.NET 8)
+- **Language:** C# 12
+- **ORM:** Entity Framework Core 8
+- **Database:** SQLite 3 (file-based)
+- **Frontend:** Razor Views, Bootstrap 5, Bootstrap Icons, custom CSS (using BEM)
 
-- **Data Structures (Advanced):**
-  - **Part 2 - Local Events:**
-    - `SortedDictionary<DateTime, List<Event>>` - Events by date (O(log n) lookups)
-    - `Dictionary<string, List<Event>>` - Events by category (O(1) lookups)
-    - `HashSet<string>` - Unique categories
-    - `HashSet<DateTime>` - Unique event dates
-    - `PriorityQueue<Event, DateTime>` - Upcoming events prioritization
-    - `Stack<Event>` - Recently viewed events (LIFO)
-    - `List<SearchHistoryItem>` - User search tracking (session-based)
-  - **Part 3 - Service Request Status:**
-    - `BinarySearchTree<Issue>` - Fast ID lookups (O(log n))
-    - `MinHeap<Issue>` - Priority queue for urgent issues (O(log n) operations)
-    - `Graph<int>` - Dependency tracking with BFS traversal (O(V + E))
+### Architecture Patterns
+- **MVCS** (Model-View-Controller-Service)
+- **Repository Pattern**
+- **Service Layer**
+- **Dependency Injection**
+- **AutoMapper**
 
-- **Design Patterns:**
-  - MVC (Model-View-Controller)
-  - Repository Pattern (Service Layer)
-  - Dependency Injection
-  - Async/Await for all database operations
+### Data Structures
 
-## Project Structure
+**Part 2 - Local Events:**
+- `SortedDictionary`
+- `Dictionary`
+- `HashSet`
+- `PriorityQueue`
+
+**Part 3 - Service Request Status:**
+- Custom-built `BinarySearchTree<T>`
+- Custom-built `MinHeap<T>`
+- Custom-built `Graph<T>`
+
+---
+
+## 📁 Project Structure
+
+I focused on a clean architecture. Here are the most important folders and what they do:
 
 ```
 Municipal-Servcies-Portal/
@@ -126,26 +103,33 @@ Municipal-Servcies-Portal/
 │   ├── IssueController.cs              # Database-backed issue reporting
 │   ├── LocalEventsController.cs        # Events, filtering, recommendations
 │   └── ServiceRequestController.cs     # Service request tracking & search (Part 3)
+│
 ├── Data/
 │   ├── AppDbContext.cs                 # EF Core DbContext
 │   └── DbSeeder.cs                     # Seeds events + service requests with dependencies
+│
 ├── DataStructures/                     # Part 3: Advanced data structures
 │   ├── BinarySearchTree.cs             # O(log n) ID lookups
 │   ├── MinHeap.cs                      # Priority queue implementation
 │   └── Graph.cs                        # Dependency tracking with BFS
+│
 ├── Extensions/
 │   └── ServiceCollectionExtensions.cs  # DI configuration
+│
 ├── Mapping/
 │   └── MappingProfile.cs               # AutoMapper configuration
+│
 ├── Migrations/
 │   ├── 20251014160425_InitialCreate.cs
 │   ├── 20251015092707_AddIssuesTable.cs
 │   └── 20251109195810_AddPriorityAndDependenciesToIssue.cs
+│
 ├── Models/
-│   ├── Issue.cs                    # Database entity with validation
-│   ├── Event.cs                    # Event entity (formerly Events.cs)
-│   ├── Announcement.cs             # Announcement entity
+│   ├── Issue.cs                        # Database entity with validation
+│   ├── Event.cs                        # Event entity
+│   ├── Announcement.cs                 # Announcement entity
 │   └── ErrorViewModel.cs
+│
 ├── Repositories/                       # Data access layer
 │   ├── IRepository.cs                  # Generic repository interface
 │   ├── Repository.cs                   # Generic repository implementation
@@ -153,6 +137,7 @@ Municipal-Servcies-Portal/
 │   ├── IssueRepository.cs
 │   ├── IEventRepository.cs             # Event-specific repository
 │   └── EventRepository.cs
+│
 ├── Services/                           # Business logic layer
 │   ├── IIssueService.cs                # Issue service interface
 │   ├── IssueService.cs                 # Database CRUD for issues
@@ -161,6 +146,7 @@ Municipal-Servcies-Portal/
 │   ├── SearchHistoryService.cs         # Session-based tracking
 │   ├── IServiceRequestService.cs       # Service request interface (Part 3)
 │   └── ServiceRequestService.cs        # Search, filter, BST/Heap/Graph operations
+│
 ├── ViewModels/
 │   ├── LocalEventsViewModel.cs         # Events composite view model
 │   ├── IssueCreateViewModel.cs         # Issue creation
@@ -168,6 +154,7 @@ Municipal-Servcies-Portal/
 │   ├── ServiceRequestListViewModel.cs  # Service request list (Part 3)
 │   ├── ServiceRequestDetailViewModel.cs # Service request details
 │   └── ServiceRequestSearchViewModel.cs # Search wrapper with filters
+│
 ├── Views/
 │   ├── Home/
 │   │   ├── Index.cshtml
@@ -184,6 +171,7 @@ Municipal-Servcies-Portal/
 │       ├── _Layout.cshtml              # Includes Bootstrap Icons CDN
 │       ├── _ValidationScriptsPartial.cshtml
 │       └── Error.cshtml
+│
 ├── wwwroot/
 │   ├── css/
 │   │   ├── site.css
@@ -197,1141 +185,295 @@ Municipal-Servcies-Portal/
 │   ├── js/
 │   │   ├── site.js
 │   │   └── localevents.js
-│   └── uploads/                    # User-uploaded files
-├── appsettings.json                # Connection strings
+│   └── uploads/                        # User-uploaded files
+│
+├── appsettings.json                    # Connection strings
 ├── appsettings.Development.json
-├── Program.cs                      # DI, services, middleware, session config
+├── Program.cs                          # DI, services, middleware, session config
 └── Municipal-Servcies-Portal.csproj
 ```
 
-## Database Schema
+---
 
-**Database Engine:** SQLite 3
-**File:** `municipal_services.db`
-**Note:** Entity Framework Core automatically maps .NET types to appropriate SQLite types (TEXT, INTEGER, REAL, BLOB)
-
-### Issues Table
-- `Id` (int, PK, Identity) - Unique identifier
-- `Location` (nvarchar(200)) - Issue location
-- `Category` (nvarchar(100)) - Issue type
-- `Description` (nvarchar(2000)) - Detailed description
-- `AttachmentPathsJson` (nvarchar(4000)) - JSON array of file paths
-- `DateReported` (datetime2) - Submission timestamp
-- `Status` (nvarchar(50)) - Pending/InProgress/Resolved/Closed
-- `NotificationEmail` (nvarchar(200)) - Optional email
-- `NotificationPhone` (nvarchar(20)) - Optional phone
-- `LastUpdated` (datetime2) - Last modification timestamp
-- `AssignedTo` (nvarchar(100)) - Assigned staff member
-- `IsActive` (bit) - Soft delete flag
-- **`Priority` (int, 1-5)** - Priority level for MinHeap (1=Critical, 5=Very Low) **[Part 3]**
-- **`DependenciesJson` (nvarchar(1000))** - JSON array of dependent issue IDs for Graph **[Part 3]**
-- **Indexes:** Category, DateReported, Status, Priority
-
-## How It Works
-
-### Backend Architecture
-
-#### Issue Reporting (Database-Backed)
-1. **Model:** `Issue` entity with validation attributes and JSON serialization for attachments
-2. **Service:** `IssuesServices` uses Entity Framework Core for async CRUD operations
-3. **Controller:** `IssueController` handles form submission, file uploads, and database persistence
-4. **Storage:** SQLite database with automatic ID generation and reference numbers
-
-#### Local Events & Recommendations
-1. **Data Structures:** `LocalEventsService` loads events into advanced data structures:
-   - SortedDictionary for chronological ordering
-   - Dictionary for category-based lookups (O(1))
-   - HashSet for unique values
-   - PriorityQueue for upcoming events
-   - Stack for recently viewed events
-
-2. **Search & Filter:** Async database queries with multiple filter criteria:
-   - Text search (partial match, case-insensitive)
-   - Category filter (exact match)
-   - Date range filter (events from date onwards)
-   - Auto-submit with 500ms debounce
-
-3. **Recommendation Engine:**
-   - Tracks user searches in session storage (List structure)
-   - Analyzes last 10 searches for patterns
-   - Frequency analysis on categories
-   - Keyword matching in event titles/descriptions/categories
-   - Multi-tier fallback strategy
-
-4. **Session Management:**
-   - `SearchHistoryService` stores search history per user (simplified List-based)
-   - 2-hour session timeout
-   - JSON serialization for session storage
-   - Maximum 10 searches tracked
-
-### Frontend Features
-
-#### Issue Reporting Form
-- **Progress Bar:** Dynamic calculation based on filled fields
-- **File Upload:** Drag-and-drop with multiple file support
-- **Validation:** Client-side and server-side validation
-- **Confirmation:** Displays unique reference number from database
-
-#### Local Events Page
-- **Auto-Submit Filters:** Forms submit automatically on change (debounced 500ms)
-- **Bootstrap Icons:** Professional icons for search, calendar, announcements
-- **Recommendations Section:** Top 3 events based on user behavior
-- **Color-Coded Categories:** 
-  - Blue: Government Meetings, Community Events
-  - Green: Parks & Recreation, Utilities
-  - Orange: Cultural Events
-- **Responsive Grid:** Events and announcements in two-column layout
-
-## Setup & Running
+## 🚀 Setup & Installation
 
 ### Prerequisites
 - .NET 8.0 SDK
-- Visual Studio 2022 / JetBrains Rider / VS Code
-- **No database server required!** - Uses SQLite (file-based database included)
+- A code editor (like Visual Studio 2022 or VS Code)
 
-### Installation
+### Installation Steps
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/ST10298850/ST10298850-Luke-Petzer-PROG7312-POE.git
-   cd ST10298850-Luke-Petzer-PROG7312-POE/Municipal-Servcies-Portal
-   ```
-
-2. **Database Configuration (SQLite - No Setup Required!):**
-
-   The application uses **SQLite**, a lightweight, file-based database that requires **no installation or configuration**. The database file `municipal_services.db` will be automatically created in the project directory when you run the application for the first time.
-
-   **Connection String** (already configured in `appsettings.json`):
-   ```json
-   "ConnectionStrings": {
-     "DefaultConnection": "Data Source=municipal_services.db"
-   }
-   ```
-
-   **Benefits of SQLite:**
-   - ✅ **No server installation required** - Works on Windows, macOS, and Linux
-   - ✅ **Zero configuration** - Just run the application
-   - ✅ **Portable** - Single file database, easy to backup or share
-   - ✅ **Perfect for development and small-to-medium applications**
-   - ✅ **Cross-platform** - Same code works everywhere
-
-   **Database Location:**
-   The `municipal_services.db` file is created in:
-   ```
-   Municipal-Servcies-Portal/municipal_services.db
-   ```
-
-3. **Restore Dependencies:**
-   ```bash
-   dotnet restore
-   ```
-
-4. **Apply Database Migrations:**
-   
-   This will create the database and all tables automatically:
-   ```bash
-   dotnet ef database update
-   ```
-   
-   **Expected Output:**
-   ```
-   Build succeeded.
-   Applying migration '20251014160425_InitialCreate'.
-   Applying migration '20251015092707_AddIssuesTable'.
-   Done.
-   ```
-   
-   **What this does:**
-   - Creates the `MunicipalServices` database
-   - Creates three tables: `Issues`, `Events`, `Announcements`
-   - Seeds 27 events with realistic times and 10 announcements automatically
-   - Sets up all indexes and constraints
-
-5. **Build and Run:**
-   ```bash
-   dotnet run
-   ```
-   
-   Or if using Visual Studio/Rider, press **F5** or click **Run**.
-
-6. **Open in Browser:**
-   
-   Navigate to the URL shown in the terminal (typically):
-   - **HTTPS:** `https://localhost:5001` or `https://localhost:5298`
-   - **HTTP:** `http://localhost:5000`
-
-### Verify Database Setup
-
-After running migrations, verify your database was created:
-
-**Check if database file exists:**
+#### 1. Clone the Repository
 ```bash
-# From the project directory
-ls -la municipal_services.db
-
-# Or on Windows:
-dir municipal_services.db
+git clone https://github.com/ST10298850/ST10298850-Luke-Petzer-PROG7312-POE.git
+cd ST10298850-Luke-Petzer-PROG7312-POE/Municipal-Servcies-Portal
 ```
 
-**View database contents** (optional):
-- Download [DB Browser for SQLite](https://sqlitebrowser.org/) (free, c
-- 
-- 'ss-platform)
-- Open `municipal_services.db` file
-- Browse tables: Issues, Events, Announcements
-- Expected: 23+ seeded service requests with priorities and dependencies
+#### 2. Database Configuration (No Setup Required!)
+The project uses SQLite. The database file `municipal_services.db` will be **automatically created** in the project directory when you run the application.
 
-**Command-line verification:**
-```bash
-# Using sqlite3 (install if needed: brew install sqlite on macOS)
-sqlite3 municipal_services.db "SELECT COUNT(*) FROM Issues;"
+The connection string is already set up in `appsettings.json`:
+```json
+"ConnectionStrings": {
+  "DefaultConnection": "Data Source=municipal_services.db"
+}
 ```
 
-**Expected:** Should return `23` or more (number of seeded service requests)
+#### 3. Restore Dependencies
+```bash
+dotnet restore
+```
 
-### Common Database Setup Issues
+#### 4. Apply Database Migrations
+This command will automatically create the `municipal_services.db` file and build all the tables and seed them with test data.
 
-#### Issue: "Cannot open database" or "Database is locked"
-**Solution:** 
-- Close any programs that might have the database file open (DB Browser, etc.)
-- Stop the application if it's running
-- Run migrations again:
 ```bash
 dotnet ef database update
 ```
 
-#### Issue: "No such table: Issues/Events"
-**Solution:** Migrations not applied. Run:
-```bash
-dotnet ef database update
+**Expected Output:**
+```
+Build succeeded.
+Applying migration '20251014160425_InitialCreate'.
+Applying migration '20251015092707_AddIssuesTable'.
+Applying migration '20251109195810_AddPriorityAndDependenciesToIssue'.
+Done.
 ```
 
-#### Issue: "Database file not found"
-**Solution:** The database will be created automatically on first run. If missing:
-```bash
-# Delete any existing migration errors
-dotnet ef database drop --force
+This seeds the database with:
+- 27 sample events for Part 2
+- 23 sample service requests with pre-defined priorities and dependencies to test the Part 3 features
 
-# Recreate the database
-dotnet ef database update
+#### 5. Build and Run
+```bash
+dotnet run
 ```
 
-#### Issue: "Need to start fresh"
-**Solution:** Simply delete the database file and restart:
-```bash
-# Delete the database file (macOS/Linux)
-rm municipal_services.db
+Or, if using Visual Studio, just press **F5**.
 
-# Or on Windows
-del municipal_services.db
+#### 6. Open in Browser
+Navigate to the URL shown in the terminal (e.g., `https://localhost:5001`).
 
-# Recreate with migrations
-dotnet ef database update
-```
+---
 
-#### Issue: "Want to move or backup the database"
-**Solution:** SQLite uses a single file, just copy it:
-```bash
-# Backup
-cp municipal_services.db municipal_services_backup.db
-
-# Restore
-cp municipal_services_backup.db municipal_services.db
-```
-
-## Usage Guide
+## 📖 Usage Guide
 
 ### Reporting an Issue
-1. Click **"Report Issues"** on the home page or navigation
-2. Fill in required fields:
-   - Location (street address or landmark)
-   - Category (select from dropdown)
-   - Description (detailed explanation)
-3. Optionally:
-   - Upload files (drag-and-drop or click to browse, supports multiple files)
-   - Add notification email/phone for updates
-4. Watch the progress bar fill as you complete fields
-5. Submit → Issue saved to database with unique ID
-6. View confirmation page with reference number (e.g., `#MSP-2025-000001`)
+
+1. Click **"Report Issues"** in the navigation bar
+2. Fill in the form (location, category, description)
+3. Optionally, drag and drop image files into the upload box
+4. Click **"Submit Report"**
+5. You will be redirected to a confirmation page with your unique tracking number
 
 ### Browsing Local Events
-1. Click **"Local Events"** on the navigation menu
-2. Use filters to search (all filters auto-submit):
-   - **Search box:** Type event keywords (e.g., "Farmers", "Yoga", "Town Hall")
-   - **Category dropdown:** Filter by event type (Community Events, Parks & Recreation, etc.)
-   - **Date picker:** Show events from specific date onwards
-3. View events with realistic times (e.g., "Saturday, October 19, 2025 • 6:00 PM")
-4. See **"Recommended for You"** section at top:
-   - Based on your search history
-   - Updates as you search more
-   - Shows top 3 personalized events
-5. Click "Clear Filters" to reset and see all upcoming events
-6. Browse municipal announcements in the right sidebar
 
-### How Recommendations Work
-- Search for events by text or category
-- System tracks your searches in session storage
-- Recommendations prioritize:
-  1. **Category-based**: Events in your most searched category
-  2. **Keyword-based**: Events matching your search terms
-  3. **Upcoming fallback**: General upcoming events if not enough matches
-- Recommendations persist during your session (2 hours)
-- Privacy-focused: Search history stored only in your session, not database
+1. Click **"Local Events"** in the navigation bar
+2. Use the search box, category dropdown, or date picker to filter events
+3. The page updates automatically as you type
+4. The **"Recommended for You"** section will update based on your search history
 
+### Tracking a Service Request (Part 3)
 
-## Database Seeding
+#### 1. View All Requests
+1. Click **"Service Request Status"** in the navigation bar
+2. You will see a table of all submitted issues
 
-The application automatically seeds the database with:
+#### 2. Search for Requests
 
-**Events & Announcements (Part 2):**
-- **27 diverse events** across 8 categories spanning 30 days
-- **Realistic event times**: Morning workshops (8-9 AM), evening meetings (6-9 PM), all-day festivals, etc.
-- **10 municipal announcements** with recent dates
-- Events include: Town halls, festivals, farmers markets, safety workshops, cultural events, health screenings, and more
+**Quick ID Search (BST):**
+- Type an ID number (e.g., "10") into the search box
+- Click "Search" for an instant result
 
-**Service Requests (Part 3):**
-- **23 service requests** with varying priorities and dependencies
-- **Priority distribution**: 3 Critical, 4 High, 7 Medium, 4 Low, 4 Very Low
-- **Dependency chains**: Linear chains (A→B→C), multiple dependencies (requires both A AND B), and independent issues
-- **Example dependencies**: 
-  - "Repave road" depends on "Fix water main"
-  - "Install streetlights" depends on "Repave road"
-- **Realistic scenarios**: Gas leaks, potholes, broken streetlights, graffiti, water issues, etc.
+**Text Search:**
+- Type a keyword (e.g., "pothole")
+- Searches across location, category, and description
 
-## Troubleshooting
+**Category Filter:**
+- Use the dropdown to see all issues for a specific category
 
-### Database Issues
-```bash
-# Check if database file exists
-ls -la municipal_services.db
+#### 3. Sort by Priority (Heap)
+- Click the **"Sort by Priority"** button
+- The list will re-order, showing "Priority 1" (Critical) issues at the top
+- Thanks to the Min-Heap implementation
 
-# If corrupted or issues, recreate:
-rm municipal_services.db
-dotnet ef database update
-
-# On Windows:
-del municipal_services.db
-dotnet ef database update
-```
-
-### Migration Errors
-```bash
-# Check existing migrations
-dotnet ef migrations list
-
-# Apply to database
-dotnet ef database update
-```
-
-### Session Not Persisting
-- Ensure `app.UseSession()` is before `app.UseAuthorization()` in Program.cs
-- Check browser cookies are enabled
-- Session timeout is set to 2 hours (120 minutes)
-
-### Bootstrap Icons Not Showing
-- Check internet connection (icons loaded from CDN)
-- Verify `_Layout.cshtml` includes Bootstrap Icons CDN link
-- Clear browser cache and refresh
-
-## Technologies & NuGet Packages
-
-```xml
-<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.10" />
-<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.10" />
-<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10" />
-<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
-```
-
-**External Libraries:**
-- Bootstrap 5 (CSS Framework)
-- Bootstrap Icons 1.11.1 (Icon Library - CDN)
-- jQuery 3.x (JavaScript Library)
+#### 4. Track Dependencies (Graph)
+- Click the **"View"** button on any issue
+- On the "Details" page, scroll down to the **"Dependencies"** section
+- If an issue is blocked by another, it will be shown here
+- Example: `Issue #21: Install streetlights` might be blocked by `Issue #18: Repave road`
 
 ---
 
-## Part 3: Service Request Status - Advanced Data Structures Implementation
+## 🔍 Part 3: Data Structures Explained
 
-### Overview
+This section provides the in-depth explanation of *how* the data structures for Part 3 were implemented and *why* they were chosen.
 
-The **Service Request Status** feature (Part 3) extends the **Report Issues** functionality (Part 1) by implementing advanced data structures to efficiently track, search, and manage submitted service requests. While Part 1 allows users to *create* issues, Part 3 enables users to:
+### Architecture: Hybrid In-Memory Model
 
-1. **View** a comprehensive list of all submitted service requests
-2. **Search** for specific requests by ID using Binary Search Trees
-3. **Track** request progress with priority-based sorting using Min Heaps
-4. **Visualize** dependencies between related requests using Graphs
+To meet the POE requirements for efficiency, I did not query the database for every single operation. Instead, I used a hybrid approach:
 
-This section provides an in-depth explanation of each data structure's role and contribution to the feature's efficiency.
-
----
-
-### Architecture: Service Layer Pattern with In-Memory Data Structures
-
-The Service Request Status feature follows the **Repository-Service-Controller** pattern:
+1. When the `ServiceRequestService` is first used, it fetches all `Issues` from the database (via the `IssueRepository`) into a `List<Issue>`
+2. It then populates the **BST**, **Min-Heap**, and **Graph** data structures in memory
+3. All "read" operations (searching, sorting, tracking dependencies) are then performed instantly on these in-memory structures
 
 ```
-┌─────────────┐      ┌──────────────────┐      ┌─────────────────┐
-│  Database   │ ───> │  IssueRepository │ ───> │ ServiceRequest  │
-│  (SQLite)   │      │   (EF Core)      │      │    Service      │
-└─────────────┘      └──────────────────┘      └─────────────────┘
-                                                         │
-                                    ┌────────────────────┼────────────────────┐
-                                    │                    │                    │
-                            ┌───────▼──────┐    ┌───────▼──────┐    ┌───────▼──────┐
-                            │ Binary Search│    │   Min Heap   │    │    Graph     │
-                            │     Tree     │    │(Priority Q.) │    │ (Dependencies)│
-                            └──────────────┘    └──────────────┘    └──────────────┘
+┌─────────────┐     ┌──────────────────┐     ┌─────────────────┐
+│  Database   │ ──> │ IssueRepository  │ ──> │ ServiceRequest  │
+│  (SQLite)   │     │   (EF Core)      │     │    Service      │
+└─────────────┘     └──────────────────┘     └─────────────────┘
+                                                       │
+                           ┌───────────────────────────┼───────────────────────────┐
+                           │                           │                           │
+                    ┌──────▼──────┐           ┌────────▼────────┐       ┌─────────▼────────┐
+                    │   Binary    │           │    Min Heap     │       │      Graph       │
+                    │ Search Tree │           │ (Priority Q.)   │       │  (Dependencies)  │
+                    └─────────────┘           └─────────────────┘       └──────────────────┘
 ```
-
-**Key Design Decisions:**
-- **Database persistence** for data integrity and permanence
-- **In-memory data structures** for fast read operations (O(log n) or O(1))
-- **Initialization on startup** to load all issues into data structures
-- **No database writes** from data structure operations (read-only)
 
 ---
 
 ### Data Structure 1: Binary Search Tree (BST)
 
-#### **Role in Service Request Status**
+#### Role in Feature
+The BST is used for the **"Quick ID Search"** feature. Its sole purpose is to find a specific issue by its `Id` as fast as possible.
 
-The Binary Search Tree provides **fast lookup** of individual service requests by their unique ID. When a user wants to track a specific request using its reference number (e.g., `#MSP-2025-000042`), the BST enables efficient retrieval without scanning through all records.
+#### Implementation Details
+- A custom generic `BinarySearchTree<T>` class was built in `DataStructures/BinarySearchTree.cs`
+- In the `ServiceRequestService`, I loop through all issues and call `_bst.Insert(issue.Id, issue)`
+- The `Id` is the key, and the `Issue` object is the data
+- When the user searches for an ID, the service calls `_bst.Search(key)`
 
-#### **Implementation Details**
+#### Efficiency Contribution
 
-**File:** `DataStructures/BinarySearchTree.cs`
+| Operation | Linear Search (`List.First()`) | Binary Search Tree (`Search()`) |
+|-----------|--------------------------------|----------------------------------|
+| **Time (Big O)** | **O(n)** | **O(log n)** |
+| **Comparisons** | 10,000 (worst case) | ~14 (worst case) |
 
-```csharp
-public class BinarySearchTree<T>
-{
-    private class Node
-    {
-        public int Key { get; set; }        // Issue ID
-        public T Data { get; set; }         // Issue object
-        public Node? Left { get; set; }
-        public Node? Right { get; set; }
-    }
+**Example:**
 
-    private Node? _root;
+If there are 10,000 issues in the system:
+- A **Linear Search** (like `List.First(i => i.Id == 9876)`) would have to check each item one by one. In the worst case, it would take **10,000 comparisons**.
+- A **BST Search** divides the search area in half with each step. It would take a maximum of **~14 comparisons** (since log₂(10,000) ≈ 13.3).
+- This makes the search feel instantaneous, regardless of the database size.
 
-    // Insert: O(log n) average case
-    public void Insert(int key, T data) { ... }
-
-    // Search: O(log n) average case
-    public T? Search(int key) { ... }
-}
-```
-
-#### **Efficiency Contribution**
-
-| Operation | Linear Search (List) | Binary Search Tree |
-|-----------|---------------------|-------------------|
-| Search by ID | O(n) | O(log n) |
-| Insert | O(1) | O(log n) |
-| Memory | O(n) | O(n) |
-
-**Example Scenario:**
-
-A municipality has 10,000 service requests in the system. A citizen wants to track request `#MSP-2025-007832`.
-
-Without BST (Linear Search): The system would have to check each request one by one. In the worst case, to find an item in 10,000 requests, it would take 10,000 comparisons.
-
-With BST: The system divides the search area in half with each step. To find an item in 10,000 requests, it would take a maximum of ~14 comparisons (since log₂(10,000) ≈ 13.3). This makes the search feel instantaneous, regardless of the database size.
-**Code Usage in `ServiceRequestService.cs`:**
-
-```csharp
-// Initialization: O(n log n) - done once
-foreach (var issue in _allIssues)
-{
-    _bst.Insert(issue.Id, issue);
-}
-
-// Retrieval: O(log n) - done per request
-public async Task<ServiceRequestDetailViewModel?> GetRequestDetailsAsync(int id)
-{
-    await EnsureInitializedAsync();
-    
-    // Fast lookup using BST
-    var issue = _bst.Search(id);
-    if (issue == null) return null;
-    
-    return _mapper.Map<ServiceRequestDetailViewModel>(issue);
-}
-```
-
-**Real-World Benefit:**
-When a user clicks on a service request in the list view to see its details, the BST retrieves the record in logarithmic time, providing instant response even with thousands of requests in the system.
+#### Real-World Benefit
+It provides an instant, sub-second lookup for users and admins, even if the system scales to millions of service requests.
 
 ---
 
-### Data Structure 2: Min Heap (Priority Queue)
+### Data Structure 2: Min-Heap (Priority Queue)
 
-#### **Role in Service Request Status**
+#### Role in Feature
+The Min-Heap is used to implement the **"Sort by Priority"** page. It ensures that the most critical issues (e.g., "Priority 1: Gas Leak") are always at the top of the list, allowing municipal staff to address them first.
 
-The Min Heap implements a **Priority Queue** that automatically sorts service requests by urgency. Critical issues (Priority 1) are always at the top, ensuring municipal staff can address the most urgent problems first. This structure maintains the heap property: parent nodes always have lower priority values than their children.
+#### Implementation Details
+- A custom generic `MinHeap<T>` class was built in `DataStructures/MinHeap.cs`
+- It uses a `List<T>` internally to manage the heap structure
+- When the user clicks the "Sort by Priority" button, the service populates a *new* Min-Heap by calling `_heap.Insert(issue.Priority, issue)` for all issues
+- It then calls `_heap.ExtractMin()` repeatedly to pull items out in perfect priority order (Priority 1 first, then 2, etc.)
 
-#### **Implementation Details**
+#### Efficiency Contribution
 
-**File:** `DataStructures/MinHeap.cs`
+| Operation | `List.Sort()` | Min-Heap |
+|-----------|---------------|----------|
+| **Time (Big O)** | **O(n log n)** | **O(n log n)** (to build + extract all) |
+| **Get Next Item** | (N/A) | **O(log n)** (to extract) or **O(1)** (to peek) |
 
-```csharp
-public class MinHeap<T>
-{
-    private class HeapNode
-    {
-        public int Priority { get; set; }   // 1=Critical, 5=Very Low
-        public T Data { get; set; }         // Issue object
-    }
+The *real* benefit of a heap isn't just sorting an entire list; it's efficiently managing a *dynamic* queue where new, high-priority items can be added and immediately "bubble up" to the top.
 
-    private readonly List<HeapNode> _heap;
+#### Example Scenario
 
-    // Insert: O(log n)
-    public void Insert(int priority, T data) { ... }
+A service desk is processing requests:
 
-    // Extract Min: O(log n)
-    public T? ExtractMin() { ... }
-}
-```
+1. Queue: `[#38: Streetlight (P3)]`, `[#51: Graffiti (P4)]`
+2. A new request comes in: `[#42: Gas Leak (P1)]`
+3. **Without a Heap (FIFO):** The P1 request is stuck behind the P3 and P4 issues
+4. **With a Min-Heap:** The `Insert()` operation places the P1 request at the top of the queue in `O(log n)` time. The next `ExtractMin()` call will immediately return the gas leak, preventing a critical issue from being missed.
 
-**Heap Structure Example:**
-
-```
-Priority levels: 1 (Critical), 2 (High), 3 (Medium), 4 (Low), 5 (Very Low)
-
-               [1]              ← Root: Most urgent (Critical)
-              /   \
-           [2]     [2]          ← High priority issues
-          /  \     /  \
-        [3]  [4] [3]  [5]       ← Medium, Low, Very Low issues
-```
-
-**Heap Operations:**
-- **Insert:** Add to end, then "bubble up" to maintain min-heap property
-- **ExtractMin:** Remove root, replace with last element, then "bubble down"
-
-#### **Efficiency Contribution**
-
-| Operation | Sorted List | Min Heap |
-|-----------|------------|----------|
-| Insert | O(n) | O(log n) |
-| Get Min | O(1) | O(1) |
-| Remove Min | O(n) | O(log n) |
-| Build from n items | O(n log n) | O(n log n) |
-
-**Priority Levels:**
-1. **Critical (1):** Infrastructure failures, public safety hazards
-2. **High (2):** Major service disruptions, health concerns
-3. **Medium (3):** Standard maintenance, non-urgent repairs
-4. **Low (4):** Cosmetic issues, enhancement requests
-5. **Very Low (5):** Suggestions, feedback
-
-#### **Example Scenario**
-
-A municipal service desk receives requests throughout the day. Using the Min Heap:
-
-**Sample Dataset:**
-- Request #42: "Gas leak reported" - Priority 1 (Critical)
-- Request #38: "Streetlight out" - Priority 3 (Medium)
-- Request #47: "Pothole on Main St" - Priority 2 (High)
-- Request #51: "Graffiti on wall" - Priority 4 (Low)
-- Request #55: "Park bench damaged" - Priority 2 (High)
-
-**Heap Processing Order:**
-1. Extract #42 (Priority 1) - Gas leak → Immediate dispatch
-2. Extract #47 (Priority 2) - Pothole → Schedule repair crew
-3. Extract #55 (Priority 2) - Bench → Add to maintenance queue
-4. Extract #38 (Priority 3) - Streetlight → Routine maintenance
-5. Extract #51 (Priority 4) - Graffiti → Next available crew
-
-**Without Heap (FIFO Queue):**
-- Process order: #42, #38, #47, #51, #55
-- Gas leak handled first ✓, but pothole waits behind streetlight ✗
-
-**With Min Heap:**
-- Process order: #42, #47, #55, #38, #51
-- All critical/high issues handled before medium/low ✓
-
-**Code Usage in `ServiceRequestService.cs`:**
-
-```csharp
-// Initialization: Build heap from all issues
-foreach (var issue in _allIssues)
-{
-    _heap.Insert(issue.Priority, issue);
-}
-
-// Get requests sorted by priority
-public async Task<List<ServiceRequestListViewModel>> GetRequestsByPriorityAsync()
-{
-    await EnsureInitializedAsync();
-    
-    // Create a copy of the heap (we don't want to destroy the original)
-    var priorityHeap = new MinHeap<Issue>();
-    foreach (var issue in _allIssues)
-    {
-        priorityHeap.Insert(issue.Priority, issue);
-    }
-    
-    // Extract in priority order (highest to lowest urgency)
-    var sortedIssues = new List<Issue>();
-    while (priorityHeap.Count > 0)
-    {
-        sortedIssues.Add(priorityHeap.ExtractMin());
-    }
-    
-    return _mapper.Map<List<ServiceRequestListViewModel>>(sortedIssues);
-}
-```
-
-**Real-World Benefit:**
-The Min Heap ensures that when municipal staff view the "Priority Queue" page, critical issues are always displayed first. This automatic prioritization helps prevent overlooked emergencies and optimizes resource allocation.
+#### Real-World Benefit
+The Min-Heap provides a structurally sound way to manage a priority queue, ensuring critical issues are never lost in the list and are always processed first.
 
 ---
 
 ### Data Structure 3: Graph (Dependency Tracking)
 
-#### **Role in Service Request Status**
+#### Role in Feature
+The Graph is used to model and visualize **dependencies between service requests**. This is crucial for project management, as some tasks cannot begin until others are finished.
 
-The Graph structure models **dependencies between service requests**. Some issues cannot be resolved until prerequisite issues are completed. For example:
-- "Repave road" depends on "Fix water main"
-- "Install streetlights" depends on "Restore power line"
+#### Implementation Details
+- A custom `Graph<T>` class was built in `DataStructures/Graph.cs`
+- It uses a `Dictionary<T, List<T>>` to store an adjacency list (e.g., `Issue_ID -> List_of_Dependencies`)
+- The `Issue` model was updated with a `DependenciesJson` field, which stores a list of other `Issue.Id`s (e.g., `[8, 12]`)
+- When the service initializes, it populates the graph:
+  1. `_graph.AddVertex(issue.Id)` for every issue
+  2. `_graph.AddEdge(issue.Id, dependencyId)` for every item in the `Dependencies` list
+- When a user views the "Details" page, the service calls `_graph.BreadthFirstSearch(currentIssueId)` to find all connected nodes in the dependency chain
 
-The graph enables **visualization of these relationships** and ensures work is completed in the correct order.
+#### Efficiency Contribution
 
-#### **Implementation Details**
+| Operation | Naive Recursive Search | Graph with BFS |
+|-----------|------------------------|----------------|
+| **Time (Big O)** | **O(n!)** (in worst case) | **O(V + E)** |
 
-**File:** `DataStructures/Graph.cs`
+Where `V` is the number of issues (vertices) and `E` is the number of dependencies (edges).
 
-```csharp
-public class Graph<T> where T : notnull
-{
-    // Adjacency list representation: vertex → list of adjacent vertices
-    private readonly Dictionary<T, List<T>> _adjacencyList;
+#### Example Scenario
 
-    // Add vertex: O(1)
-    public void AddVertex(T vertex) { ... }
+We have a complex project:
+- `Issue #15: Fix water main`
+- `Issue #18: Repave road` (Depends on #15)
+- `Issue #21: Paint road markings` (Depends on #18)
 
-    // Add edge: O(1)
-    public void AddEdge(T source, T destination) { ... }
+When a citizen views `Issue #21`, they are confused about why it's "Pending."
 
-    // BFS traversal: O(V + E)
-    public List<T> BreadthFirstSearch(T startVertex) { ... }
-}
-```
-
-**Graph Representation:**
-
-**Example Dependency Chain:**
-```
-Issue #15: Fix water main
-    ↓ (depends on)
-Issue #18: Repave road
-    ↓ (depends on)
-Issue #21: Paint road markings
-```
-
-**Adjacency List Structure:**
-```csharp
-{
-    15: [],           // No dependencies
-    18: [15],         // Depends on #15
-    21: [18],         // Depends on #18
-}
-```
-
-**Visual Graph:**
-```
-    [15]              ← Can start immediately
-     │
-     ↓
-    [18]              ← Starts after #15 completes
-     │
-     ↓
-    [21]              ← Starts after #18 completes
-```
-
-**Complex Dependency Example:**
-```
-         [10]
-        /    \
-       ↓      ↓
-     [12]    [14]
-        \    /
-         ↓  ↓
-         [16]
-
-Issue #16 depends on both #12 AND #14
-Issue #12 depends on #10
-Issue #14 depends on #10
-```
-
-#### **Efficiency Contribution**
-
-| Operation | Naive Approach | Graph with BFS |
-|-----------|---------------|----------------|
-| Find dependencies | O(n²) nested loops | O(V + E) |
-| Check circular deps | O(n!) | O(V + E) |
-| Order tasks | O(n² log n) | O(V + E) |
-
-Where:
-- V = number of vertices (issues)
-- E = number of edges (dependencies)
-
-**Breadth-First Search (BFS) Algorithm:**
-
-BFS explores the graph level by level, finding all connected nodes:
+- The `Graph.BreadthFirstSearch(21)` is called, which returns `[21, 18, 15]`
+- The "Details" page shows the user the full chain:
 
 ```
-Starting from Issue #21:
-
-Step 1: Visit 21 → Queue: [18]      Result: [21]
-Step 2: Visit 18 → Queue: [15]      Result: [21, 18]
-Step 3: Visit 15 → Queue: []        Result: [21, 18, 15]
-
-Dependencies: [18, 15] (skip first element which is the issue itself)
-```
-
-**Time Complexity:**
-- **Best case:** O(1) - no dependencies
-- **Average case:** O(V + E) - traverse connected component
-- **Worst case:** O(V + E) - all issues connected
-
-#### **Example Scenario**
-
-**Scenario:** Major water infrastructure project affecting multiple streets
-
-**Database Storage (Issue Model):**
-```csharp
-// Issue #15: Fix water main
-DependenciesJson: "[]"              // No prerequisites
-
-// Issue #18: Repave Main Street
-DependenciesJson: "[15]"            // Depends on water main fix
-
-// Issue #21: Install streetlights on Main Street
-DependenciesJson: "[18]"            // Depends on repaving
-
-// Issue #23: Paint road markings
-DependenciesJson: "[18]"            // Also depends on repaving
-```
-
-**Graph Construction:**
-```csharp
-_graph.AddVertex(15);
-_graph.AddVertex(18);
-_graph.AddVertex(21);
-_graph.AddVertex(23);
-
-_graph.AddEdge(18, 15);  // 18 depends on 15
-_graph.AddEdge(21, 18);  // 21 depends on 18
-_graph.AddEdge(23, 18);  // 23 depends on 18
-```
-
-**BFS Traversal from Issue #21:**
-```
-Result: [21, 18, 15]
-
-Interpretation: To complete issue #21, you must first complete:
-- Issue #18 (repaving)
-- Issue #15 (water main)
-
-Work order: #15 → #18 → #21
-```
-
-**Code Usage in `ServiceRequestService.cs`:**
-
-```csharp
-// Initialization: Build graph from all issues
-foreach (var issue in _allIssues)
-{
-    _graph.AddVertex(issue.Id);
-    
-    // Add dependency edges
-    if (issue.Dependencies != null && issue.Dependencies.Any())
-    {
-        foreach (var depId in issue.Dependencies)
-        {
-            _graph.AddEdge(issue.Id, depId);
-        }
-    }
-}
-
-// Get details with dependencies
-public async Task<ServiceRequestDetailViewModel?> GetRequestDetailsAsync(int id)
-{
-    await EnsureInitializedAsync();
-    
-    var issue = _bst.Search(id);
-    if (issue == null) return null;
-    
-    var viewModel = _mapper.Map<ServiceRequestDetailViewModel>(issue);
-    
-    // Use BFS to find all dependencies
-    var dependencyIds = _graph.BreadthFirstSearch(id).Skip(1).ToList(); // Skip self
-    viewModel.DependencyIssues = _allIssues
-        .Where(i => dependencyIds.Contains(i.Id))
-        .ToList();
-    
-    return viewModel;
-}
-```
-
-**Real-World Benefit:**
-
-When viewing service request #21 (streetlight installation), the details page shows:
-
-```
-Service Request #21: Install streetlights on Main Street
+Service Request #21: Paint road markings
 Status: Waiting on Dependencies
 
 Dependencies:
-├─ #18: Repave Main Street (In Progress) ← Must complete first
-│   └─ #15: Fix water main (Resolved) ← Already completed
+├─ #18: Repave road (In Progress)
+│   └─ #15: Fix water main (Resolved)
 └─ Estimated start: After #18 completes
 ```
 
-This visualization helps:
-1. **Citizens** understand why their request is delayed
-2. **Municipal staff** plan work order and resource allocation
-3. **Project managers** identify bottlenecks in complex projects
-
----
-
-### Seeded Test Data
-
-The application includes comprehensive test data with realistic dependencies:
-
-**File:** `Data/DbSeeder.cs`
-
-```csharp
-// Sample seeded issues with priorities and dependencies:
-
-Issue #1: "Water main burst on Oak Street"
-  Priority: 1 (Critical)
-  Dependencies: []
-
-Issue #2: "Repave Oak Street after water main repair"
-  Priority: 2 (High)
-  Dependencies: [1]        // Can't repave until water main fixed
-
-Issue #3: "Install traffic lights at Oak/Main intersection"
-  Priority: 2 (High)
-  Dependencies: [2]        // Need repaved road first
-
-// 20+ more issues with varying priorities and dependencies
-```
-
-**Priority Distribution:**
-- Critical (1): 3 issues (gas leaks, major infrastructure)
-- High (2): 4 issues (safety concerns, major repairs)
-- Medium (3): 7 issues (routine maintenance)
-- Low (4): 4 issues (cosmetic issues)
-- Very Low (5): 4 issues (suggestions)
-
-**Dependency Examples:**
-- Linear chains: #1 → #2 → #3
-- Multiple dependencies: #10 requires both #7 AND #8
-- Independent issues: #5, #9, #12 (no prerequisites)
-
----
-
-
-### Usage Guide: Service Request Status
-
-#### **Viewing All Requests**
-
-1. Navigate to **Service Request Status** from the home page
-2. View comprehensive table of all submitted requests
-3. See at-a-glance information in 8 columns:
-   - Request ID and reference number
-   - Category and location
-   - Description (truncated)
-   - Status (color-coded badge)
-   - Priority level (color-coded badge)
-   - Date submitted
-   - View details action
-
-#### **Searching and Filtering Requests**
-
-The Service Request Status page includes powerful search capabilities using advanced data structures:
-
-**Quick ID Search (Binary Search Tree - O(log n))**
-1. Enter the issue ID directly (e.g., "42", "156") in the search box
-2. System uses Binary Search Tree for ultra-fast lookup
-3. Instantly displays exact match or "Not Found"
-4. **Performance:** <1ms for any database size
-
-**Example:**
-```
-Search: "42"
-Result: Issue #42 found in ~0.5ms (10,000 records)
-Uses: BST.Search(42) - O(log n) operation
-```
-
-**Text Search (In-Memory Filter - O(n))**
-1. Enter keywords (e.g., "pothole", "Main Street", "water leak")
-2. Searches across:
-   - Category names
-   - Location descriptions
-   - Issue descriptions
-3. Returns all matching results
-4. **Performance:** ~5-10ms for 10,000 records
-
-**Example:**
-```
-Search: "water"
-Result: All issues containing "water" in category/location/description
-Uses: LINQ Where clause filtering
-```
-
-**Category Filter**
-1. Select from dropdown of all available categories
-2. Exact category matching
-3. Can combine with text search
-4. **Performance:** ~5-10ms for 10,000 records
-
-**Example:**
-```
-Category: "Road Maintenance"
-Result: All road maintenance requests only
-```
-
-**Combined Search**
-```
-Search: "Main Street" + Category: "Road Maintenance"
-Result: Road maintenance issues on Main Street only
-```
-
-**Active Filters Display:**
-- Blue filter badges show applied criteria
-- "Active Filters: 🔵 search-term 🔵 category"
-- Result count updates: "Found: X results" vs "Total Requests: X"
-
-**Clearing Filters:**
-- Click "Clear" button to reset all filters
-- Returns to full list view
-
-#### **Tracking a Specific Request**
-
-1. Click on any request in the list
-2. View detailed information:
-   - Full description
-   - Attached images/documents
-   - Current status and last updated timestamp
-   - Assigned staff member (if applicable)
-   - Priority level
-   - **Dependency chain** (if applicable)
-
-**Example Detail View:**
-```
-Service Request #18
-Reference: #MSP-2025-000018
-Category: Road Maintenance
-Location: Main Street between 5th and 6th Ave
-Status: In Progress
-Priority: High (2)
-Submitted: November 3, 2025
-Last Updated: November 10, 2025
-
-Description:
-Road surface severely damaged after water main repair.
-Requires repaving before winter season.
-
-Dependencies:
-└─ #15: Fix water main burst (Resolved - Nov 9, 2025) ✓
-
-Attachments:
-- damage_photo1.jpg
-- damage_photo2.jpg
-```
-
-#### **Viewing Priority Queue**
-
-1. Click **"View by Priority"** button
-2. Requests automatically sorted by urgency:
-   - Critical issues displayed first (red badge)
-   - High priority next (orange badge)
-   - Medium, Low, Very Low follow
-3. Municipal staff can address most urgent issues first
-
-#### **Understanding Dependencies**
-
-The detail page shows a **dependency tree** using the Graph structure:
-
-```
-Issue #21: Install streetlights
-├─ Waiting on: #18 (In Progress)
-│   └─ Which waits on: #15 (Resolved ✓)
-└─ Estimated start: 3-5 days after #18 completes
-```
-
-**Color Coding:**
-- ✓ Green: Dependency resolved
-- ⏳ Orange: Dependency in progress
-- ⏸ Red: Dependency pending
-
----
-
-### Technical Implementation Details
-
-#### **Service Layer Architecture**
-
-**File:** `Services/ServiceRequestService.cs`
-
-```csharp
-public class ServiceRequestService : IServiceRequestService
-{
-    private readonly IIssueRepository _issueRepository;
-    private readonly IMapper _mapper;
-    
-    // In-memory data structures (POE requirement)
-    private readonly BinarySearchTree<Issue> _bst = new();
-    private readonly MinHeap<Issue> _heap = new();
-    private readonly Graph<int> _graph = new();
-    private List<Issue> _allIssues = new();
-    private bool _isInitialized;
-    
-    // Initialization: Load database into memory structures
-    public async Task InitializeAsync()
-    {
-        _allIssues = (await _issueRepository.GetAllAsync()).ToList();
-        
-        // Populate BST for fast lookups
-        foreach (var issue in _allIssues)
-            _bst.Insert(issue.Id, issue);
-        
-        // Populate Heap for priority sorting
-        foreach (var issue in _allIssues)
-            _heap.Insert(issue.Priority, issue);
-        
-        // Populate Graph for dependency tracking
-        foreach (var issue in _allIssues)
-        {
-            _graph.AddVertex(issue.Id);
-            foreach (var depId in issue.Dependencies)
-                _graph.AddEdge(issue.Id, depId);
-        }
-    }
-}
-```
-
-#### **Controller Layer (Thin Controllers)**
-
-**File:** `Controllers/ServiceRequestController.cs`
-
-```csharp
-public class ServiceRequestController : Controller
-{
-    private readonly IServiceRequestService _serviceRequestService;
-    
-    // Display all requests
-    public async Task<IActionResult> Index()
-    {
-        var model = await _serviceRequestService.GetAllRequestsAsync();
-        return View(model);
-    }
-    
-    // Display by priority (uses Heap)
-    public async Task<IActionResult> PriorityQueue()
-    {
-        var model = await _serviceRequestService.GetRequestsByPriorityAsync();
-        return View("Index", model);
-    }
-    
-    // Display details (uses BST + Graph)
-    public async Task<IActionResult> Details(int id)
-    {
-        var model = await _serviceRequestService.GetRequestDetailsAsync(id);
-        if (model == null) return NotFound();
-        return View(model);
-    }
-}
-```
-
-#### **Database Model Extensions**
-
-**File:** `Models/Issue.cs`
-
-```csharp
-public class Issue
-{
-    // ... existing properties ...
-    
-    // Priority for Min Heap
-    [Required]
-    [Range(1, 5)]
-    public int Priority { get; set; } = 3; // Default: Medium
-    
-    // Dependencies for Graph (stored as JSON)
-    [MaxLength(1000)]
-    public string? DependenciesJson { get; set; }
-    
-    // Helper property for Graph building
-    [NotMapped]
-    public List<int> Dependencies
-    {
-        get => string.IsNullOrEmpty(DependenciesJson)
-            ? new List<int>()
-            : JsonSerializer.Deserialize<List<int>>(DependenciesJson) ?? new List<int>();
-        set => DependenciesJson = (value != null && value.Any())
-            ? JsonSerializer.Serialize(value)
-            : null;
-    }
-}
-```
+#### Real-World Benefit
+The Graph provides an extremely fast `O(V + E)` way to traverse complex relationships. This stops staff from working in the wrong order and clearly communicates to citizens *why* their request is delayed, reducing confusion.
 
 ---
 
 ### Design Decisions and Trade-offs
 
-#### **Why In-Memory Data Structures?**
+#### Why In-Memory Data Structures?
 
-**Advantages:**
-✓ **Lightning-fast reads**: O(log n) vs O(n) or worse
-✓ **Complex operations**: BFS, priority sorting without database load
-✓ **Educational value**: Demonstrates advanced data structure usage
-✓ **Scalability**: Handles 10,000+ records easily
+For this POE, I used in-memory data structures (loaded from the database at startup) instead of querying the database every time.
 
-**Trade-offs:**
-✗ **Memory usage**: Duplicates database data in RAM
-✗ **Initialization cost**: O(n log n) startup time
-✗ **Stale data**: Requires refresh if database updated externally
+**✅ Advantages:**
+- **Performance:** All lookups, sorting, and traversals are "lightning-fast" because they happen in RAM, not on disk
+- **Meets POE:** It allowed me to demonstrate my custom-built BST, Heap, and Graph classes, which was a core requirement
+- **Reduced DB Load:** The database is only hit once on initialization, not every time a user searches or sorts
 
-**Mitigation Strategies:**
-- Lazy initialization (only load when first accessed)
-- Singleton service pattern (load once per application lifetime)
-- Refresh mechanism for long-running applications
-- Read-only operations (writes still go through repository)
+**⚠️ Trade-offs (and real-world solutions):**
 
-#### **Alternative Approaches Considered**
-
-**Approach 1: Database-Only (Rejected)**
-- ✗ Slower queries for priority sorting and dependency traversal
-- ✗ Complex SQL for graph operations
-- ✗ Doesn't demonstrate data structure knowledge
-
-**Approach 2: Full In-Memory Database (Rejected)**
-- ✗ Loses data on application restart
-- ✗ No persistence
-- ✗ Not suitable for production
-
-**Approach 3: Hybrid (Selected) ✓**
-- ✓ Database for persistence
-- ✓ In-memory for fast reads
-- ✓ Best of both worlds
-
-
-### Conclusion: 
-
+| Issue | Real-World Solution |
+|-------|---------------------|
+| **Stale Data:** If a new issue is added, the in-memory structures won't know about it until the application is restarted | Use a **Distributed Cache (like Redis)** to hold the data structures, which keeps them in-memory and fast, but also ensures all users see the same, up-to-date data |
+| **Memory Usage:** If there were 100 million issues, this would use a lot of RAM | For that scale, move the logic into the database itself, using database indexes (which are B-Trees, a type of BST) and "Recursive CTEs" (for graph traversal) in SQL |
 
 ---
 
-## References
+## 📝 License
 
-Microsoft. (2024) ASP.NET Core documentation. Available at: https://learn.microsoft.com/en-us/aspnet/core/ (Accessed: 10 October 2025).
+This project is an academic submission for PROG7312.
 
-Microsoft. (2024) Entity Framework Core overview. Available at: https://learn.microsoft.com/en-us/ef/core/ (Accessed: 10 October 2025).
+---
 
-Bootstrap. (2024) Bootstrap 5 Documentation. Available at: https://getbootstrap.com/docs/5.3/ (Accessed: 10 October 2025).
-
-
+**Author:** Luke Petzer  
+**Student Number:** ST10298850  
+**Institution:** The Independent Institute of Education  
+**Date:** November 2025
 
