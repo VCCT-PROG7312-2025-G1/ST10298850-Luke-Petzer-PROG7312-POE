@@ -11,8 +11,11 @@ This is my Portfolio of Evidence for PROG7312, an ASP.NET Core MVC application f
 **GitHub Repository:**  
 https://github.com/ST10298850/ST10298850-Luke-Petzer-PROG7312-POE.git
 
-**YouTube Video Demo:**  
+**YouTube Video Demo: Part 2**  
 https://youtu.be/Y9FKudbk_m0
+
+**YouTube Video Demo: Part 3**
+https://youtu.be/woUAP5T_vGQ
 
 ---
 
