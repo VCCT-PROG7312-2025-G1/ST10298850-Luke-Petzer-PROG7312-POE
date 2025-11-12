@@ -4,14 +4,14 @@
 // Form Progress Bar and File Upload Functionality
 document.addEventListener('DOMContentLoaded', function() {
     // Only run this code if we're on the issue creation page
-    if (document.getElementById('attachment')) {
+    if (document.getElementById('Attachments')) {
         initializeIssueForm();
     }
 });
 
 function initializeIssueForm() {
     const uploadArea = document.querySelector('.upload-area');
-    const fileInput = document.getElementById('attachment');
+    const fileInput = document.getElementById('Attachments');
     const fileInfo = document.getElementById('file-info');
     const fileName = document.querySelector('.file-name');
     const fileSize = document.querySelector('.file-size');
@@ -24,15 +24,15 @@ function initializeIssueForm() {
     // Notification elements
     const emailCheckbox = document.getElementById('emailCheckbox');
     const phoneCheckbox = document.getElementById('phoneCheckbox');
-    const emailInput = document.getElementById('notificationEmail');
-    const phoneInput = document.getElementById('notificationPhone');
+    const emailInput = document.getElementById('NotificationEmail');
+    const phoneInput = document.getElementById('NotificationPhone');
     
     // Form fields to track
     const formFields = {
-        location: document.getElementById('location'),
-        category: document.getElementById('category'),
-        description: document.getElementById('description'),
-        attachment: document.getElementById('attachment')
+        location: document.getElementById('Location'),
+        category: document.getElementById('Category'),
+        description: document.getElementById('Description'),
+        attachment: document.getElementById('Attachments')
     };
 
     // Initialize notification functionality
@@ -302,21 +302,29 @@ function initializeIssueForm() {
 }
 
 // Home page "Report Issue" button functionality
+// Home page button functionality
 document.addEventListener('DOMContentLoaded', function() {
-    var btn = document.getElementById('ReportIssueBtn');
-    if (btn) {
-        btn.addEventListener('click', function() {
+    // Report Issue button
+    var reportBtn = document.getElementById('ReportIssueBtn');
+    if (reportBtn) {
+        reportBtn.addEventListener('click', function() {
             window.location.href = '/Issue/Create';
         });
     }
-});
 
-// Home page "Report Issue" button functionality
-document.addEventListener('DOMContentLoaded', function() {
-    var btn = document.getElementById('LocalEventsBtn');
-    if (btn) {
-        btn.addEventListener('click', function() {
+    // Local Events button
+    var eventsBtn = document.getElementById('LocalEventsBtn');
+    if (eventsBtn) {
+        eventsBtn.addEventListener('click', function() {
             window.location.href = '/LocalEvents/Index';
+        });
+    }
+
+    // Service Request button
+    var serviceBtn = document.getElementById('ServiceRequestBtn');
+    if (serviceBtn) {
+        serviceBtn.addEventListener('click', function() {
+            window.location.href = '/ServiceRequest/Index';
         });
     }
 });

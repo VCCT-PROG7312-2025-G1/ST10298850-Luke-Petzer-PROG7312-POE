@@ -1,6 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using Municipal_Servcies_Portal.Data;
-using Municipal_Servcies_Portal.Services;
+using Municipal_Servcies_Portal.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,18 +18,8 @@ builder.Services.AddSession(options =>
 // Add HttpContextAccessor for session access
 builder.Services.AddHttpContextAccessor();
 
-// Add DbContext with SQL Server
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("MunicipalDB")));
-
-// Register IssueService as Scoped (requires DbContext)
-builder.Services.AddScoped<IssueService>();
-
-// Register LocalEventsService (Phase 2)
-builder.Services.AddScoped<ILocalEventsService, LocalEventsService>();
-
-// Register SearchHistoryService for recommendation tracking
-builder.Services.AddScoped<SearchHistoryService>();
+// Register all application services using extension method
+builder.Services.AddApplicationServices(builder.Configuration);
 
 var app = builder.Build();
 

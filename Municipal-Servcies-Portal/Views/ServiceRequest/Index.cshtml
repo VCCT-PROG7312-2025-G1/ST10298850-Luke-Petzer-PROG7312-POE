@@ -1,0 +1,249 @@
+@model Municipal_Servcies_Portal.ViewModels.ServiceRequestSearchViewModel
+@{
+    ViewData["Title"] = "Service Request Status";
+}
+
+<link rel="stylesheet" href="~/css/servicerequest.css" asp-append-version="true" />
+
+<div class="service-request">
+    <!-- Header Section -->
+    <header class="service-request__header">
+        <nav class="service-request__breadcrumb" aria-label="Breadcrumb">
+            <a href="/" class="service-request__breadcrumb-link">Home</a>
+            <span class="service-request__breadcrumb-separator">
+                <svg width="8" height="12" viewBox="0 0 8 12" fill="none">
+                    <path d="M2 2l4 4-4 4" stroke="#6B7280" stroke-width="2" fill="none"/>
+                </svg>
+            </span>
+            <a href="/ServiceRequest" class="service-request__breadcrumb-link service-request__breadcrumb-link--active">Service Requests</a>
+        </nav>
+        
+        <h1 class="service-request__title">Service Request Status</h1>
+        <p class="service-request__description">Track the progress of all reported issues and service requests</p>
+    </header>
+
+    <!-- SEARCH SECTION -->
+    <div class="service-request__search-section">
+        <form method="get" asp-action="Search" id="searchForm" class="service-request__search-form">
+            <div class="service-request__search-row">
+                <!-- Search Input -->
+                <div class="service-request__search-field">
+                    <label for="searchTerm" class="service-request__search-label">
+                        <i class="bi bi-search"></i> Search
+                    </label>
+                    <input 
+                        type="text" 
+                        id="searchTerm"
+                        name="searchTerm" 
+                        class="service-request__search-input" 
+                        placeholder="Search by ID, location, or description...(example., 28)"
+                        value="@Model.SearchTerm"
+                        autocomplete="off"
+                    />
+                </div>
+                
+                <!-- Category Filter -->
+                <div class="service-request__search-field">
+                    <label for="category" class="service-request__search-label">
+                        <i class="bi bi-funnel"></i> Category
+                    </label>
+                    <select 
+                        id="category"
+                        name="category" 
+                        class="service-request__search-select">
+                        <option value="">All Categories</option>
+                        @foreach (var cat in Model.AvailableCategories)
+                        {
+                            <option value="@cat" selected="@(Model.CategoryFilter == cat)">
+                                @cat
+                            </option>
+                        }
+                    </select>
+                </div>
+                
+                <!-- Search Buttons -->
+                <div class="service-request__search-actions">
+                    <button type="submit" class="service-request__button service-request__button--primary">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                    @if (Model.IsFiltered)
+                    {
+                        <a href="@Url.Action("ClearSearch")" class="service-request__button service-request__button--secondary">
+                            <i class="bi bi-x-circle"></i> Clear
+                        </a>
+                    }
+                </div>
+            </div>
+        </form>
+        
+        <!-- Active Filters Display -->
+        @if (Model.IsFiltered)
+        {
+            <div class="service-request__active-filters">
+                <span class="service-request__filter-label">Active Filters:</span>
+                @if (!string.IsNullOrEmpty(Model.SearchTerm))
+                {
+                    <span class="service-request__filter-tag">
+                        <i class="bi bi-search"></i> "@Model.SearchTerm"
+                    </span>
+                }
+                @if (!string.IsNullOrEmpty(Model.CategoryFilter))
+                {
+                    <span class="service-request__filter-tag">
+                        <i class="bi bi-tag"></i> @Model.CategoryFilter
+                    </span>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Actions Bar -->
+    <div class="service-request__actions">
+        <div class="service-request__actions-left">
+            <span class="service-request__count">
+                @if (Model.IsFiltered)
+                {
+                    <text>Found: <span class="service-request__count-number">@Model.TotalResults</span></text>
+                }
+                else
+                {
+                    <text>Total Requests: <span class="service-request__count-number">@Model.TotalResults</span></text>
+                }
+            </span>
+        </div>
+        <div class="service-request__actions-right">
+            <a href="/ServiceRequest/PriorityQueue" class="service-request__button">
+                <span class="service-request__button-icon">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M8 2L10.5 7H5.5L8 2Z"/>
+                        <path d="M3 9H13V11H3V9Z"/>
+                        <path d="M4 12H12V14H4V12Z"/>
+                    </svg>
+                </span>
+                <span>Sort by Priority</span>
+            </a>
+            <a href="/Issue/Create" class="service-request__button service-request__button--primary">
+                <span class="service-request__button-icon">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M8 2V14M2 8H14" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </span>
+                <span>Report New Issue</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Error Message Display -->
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="service-request__error">
+            <i class="bi bi-exclamation-triangle"></i>
+            <strong>Error:</strong> <span>@ViewBag.ErrorMessage</span>
+        </div>
+    }
+
+    <!-- Requests Table -->
+    @if (Model.TotalResults > 0)
+    {
+        <div class="service-request__table-container">
+            <table class="service-request__table">
+                <thead class="service-request__table-header">
+                    <tr>
+                        <th class="service-request__table-header-cell">ID</th>
+                        <th class="service-request__table-header-cell">Category</th>
+                        <th class="service-request__table-header-cell">Location</th>
+                        <th class="service-request__table-header-cell">Description</th>
+                        <th class="service-request__table-header-cell">Status</th>
+                        <th class="service-request__table-header-cell">Priority</th>
+                        <th class="service-request__table-header-cell">Date Reported</th>
+                        <th class="service-request__table-header-cell">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="service-request__table-body">
+                    @foreach (var request in Model.Results)
+                    {
+                        <tr class="service-request__table-row">
+                            <td class="service-request__table-cell service-request__table-cell--id">
+                                <strong>#@request.Id</strong>
+                                <br />
+                                <small class="text-muted">@request.ReferenceNumber</small>
+                            </td>
+                            <td class="service-request__table-cell">
+                                <i class="bi bi-tag"></i> @request.Category
+                            </td>
+                            <td class="service-request__table-cell">
+                                <i class="bi bi-geo-alt"></i> @request.Location
+                            </td>
+                            <td class="service-request__table-cell service-request__table-cell--description">
+                                @if (!string.IsNullOrEmpty(request.Description))
+                                {
+                                    @(request.Description.Length > 100 ? request.Description.Substring(0, 100) + "..." : request.Description)
+                                }
+                            </td>
+                            <td class="service-request__table-cell">
+                                <span class="service-request__badge service-request__badge--@request.Status?.ToLower()">
+                                    @request.Status
+                                </span>
+                            </td>
+                            <td class="service-request__table-cell">
+                                <span class="service-request__badge service-request__badge--priority-@request.Priority">
+                                    Priority @request.Priority
+                                </span>
+                            </td>
+                            <td class="service-request__table-cell">
+                                <i class="bi bi-calendar"></i> @request.DateReported.ToString("MMM dd, yyyy")
+                            </td>
+                            <td class="service-request__table-cell service-request__table-cell--actions">
+                                <a href="@Url.Action("Details", new { id = request.Id })" 
+                                   class="service-request__action-link">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="service-request__empty-state">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            @if (Model.IsFiltered)
+            {
+                <h3 class="service-request__empty-title">No results found</h3>
+                <p class="service-request__empty-description">
+                    Try adjusting your search criteria or filters.
+                </p>
+                <a href="@Url.Action("ClearSearch")" class="service-request__button service-request__button--primary">
+                    <i class="bi bi-arrow-counterclockwise"></i> Clear Filters
+                </a>
+            }
+            else
+            {
+                <h3 class="service-request__empty-title">No service requests yet</h3>
+                <p class="service-request__empty-description">
+                    Get started by reporting your first issue.
+                </p>
+                <a href="/Issue/Create" class="service-request__button service-request__button--primary">
+                    <i class="bi bi-plus-circle"></i> Report Issue
+                </a>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Optional: Auto-submit on category change
+        document.getElementById('category')?.addEventListener('change', function() {
+            // Uncomment to enable auto-submit
+            // document.getElementById('searchForm').submit();
+        });
+    </script>
+}
+

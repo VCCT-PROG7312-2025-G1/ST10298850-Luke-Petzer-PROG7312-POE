@@ -1,104 +1,73 @@
 // IssueController.cs
-// Handles issue creation, file uploads, and confirmation display with database persistence.
+// Thin controller - delegates all business logic to IssueService.
+// Follows MVVM pattern with ViewModels for input/output.
 using Microsoft.AspNetCore.Mvc;
-using Municipal_Servcies_Portal.Models;
 using Municipal_Servcies_Portal.Services;
-using System.Text.Json;
+using Municipal_Servcies_Portal.ViewModels;
 
 namespace Municipal_Servcies_Portal.Controllers;
 
 public class IssueController : Controller
 {
-    // Service for managing issues with database persistence.
-    private readonly IssueService _service;
-    // Provides access to web root for file uploads.
-    private readonly IWebHostEnvironment _env;
+    private readonly IIssueService _issueService;
 
     /// <summary>
-    /// Constructor for dependency injection of IssueService and environment.
+    /// Constructor for dependency injection of IIssueService.
     /// </summary>
-    public IssueController(IssueService service, IWebHostEnvironment env)
+    public IssueController(IIssueService issueService)
     {
-        _service = service;
-        _env = env;
+        _issueService = issueService;
     }
 
     /// <summary>
+    /// GET: Issue/Create
     /// Displays the issue creation form.
     /// </summary>
     [HttpGet]
     public IActionResult Create()
     {
-        return View();
+        return View(new IssueCreateViewModel());
     }
 
     /// <summary>
-    /// Handles form submission, file uploads, saves to database, and redirects to confirmation.
+    /// POST: Issue/Create
+    /// Handles form submission with validation and delegates to service.
     /// </summary>
-    /// <param name="location">Location of the issue.</param>
-    /// <param name="category">Category of the issue.</param>
-    /// <param name="description">Description of the issue.</param>
-    /// <param name="attachments">Uploaded files.</param>
-    /// <param name="notificationEmail">Optional notification email.</param>
-    /// <param name="notificationPhone">Optional notification phone.</param>
+    /// <param name="viewModel">The issue creation view model with user input.</param>
     [HttpPost]
-    public async Task<IActionResult> Create(string location, string category, string description, 
-        IFormFile[]? attachments, string? notificationEmail, string? notificationPhone)
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(IssueCreateViewModel viewModel)
     {
-        // Handle file uploads
-        var fileNames = new List<string>();
-        if (attachments != null)
+        // Return to form with validation errors if invalid
+        if (!ModelState.IsValid)
         {
-            var uploads = Path.Combine(_env.WebRootPath, "uploads");
-            Directory.CreateDirectory(uploads);
-            
-            foreach (var file in attachments)
-            {
-                if (file != null && file.Length > 0)
-                {
-                    var fileName = Path.GetFileName(file.FileName);
-                    var filePath = Path.Combine(uploads, fileName);
-                    
-                    using var stream = new FileStream(filePath, FileMode.Create);
-                    await file.CopyToAsync(stream);
-                    fileNames.Add(fileName);
-                }
-            }
+            return View(viewModel);
         }
+
+        // Delegate creation to service (thick service handles all business logic)
+        var issueId = await _issueService.CreateIssueAsync(viewModel);
         
-        // Create issue object
-        var issue = new Issue
-        {
-            Location = location,
-            Category = category,
-            Description = description,
-            AttachmentPaths = fileNames,
-            NotificationEmail = string.IsNullOrWhiteSpace(notificationEmail) ? null : notificationEmail,
-            NotificationPhone = string.IsNullOrWhiteSpace(notificationPhone) ? null : notificationPhone
-        };
-        
-        // Save to database
-        await _service.AddIssueAsync(issue);
-        
-        // Store issue ID in TempData for confirmation page
-        TempData["IssueId"] = issue.Id;
-        
-        return RedirectToAction("Confirmation", new { id = issue.Id });
+        // Redirect to confirmation with the created issue ID
+        return RedirectToAction("Confirmation", new { id = issueId });
     }
 
     /// <summary>
-    /// Displays the confirmation page with submitted issue details from database.
+    /// GET: Issue/Confirmation/{id}
+    /// Displays the confirmation page with submitted issue details.
     /// </summary>
-    /// <param name="id">The issue ID to display.</param>
+    /// <param name="id">The ID of the created issue.</param>
     public async Task<IActionResult> Confirmation(int id)
     {
-        var issue = await _service.GetIssueByIdAsync(id);
+        // Delegate retrieval to service
+        var issueViewModel = await _issueService.GetIssueByIdAsync(id);
         
-        if (issue == null)
+        // If issue not found, redirect to home
+        if (issueViewModel == null)
         {
-            return RedirectToAction("Create");
+            return RedirectToAction("Index", "Home");
         }
 
-        return View(issue);
+        // Pass ViewModel to view
+        return View(issueViewModel);
     }
 }

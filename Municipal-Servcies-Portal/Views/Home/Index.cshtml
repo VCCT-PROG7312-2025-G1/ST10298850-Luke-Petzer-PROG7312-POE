@@ -1,6 +1,9 @@
-﻿@{
+﻿@model Municipal_Servcies_Portal.ViewModels.DashboardStatsViewModel
+@{
     ViewData["Title"] = "Home Page";
 }
+
+    <link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
 
 <main class="main">
     <section class="section header">
@@ -16,9 +19,9 @@
             </div>
             <h3 class="card-title">Report Issues</h3>
             <p class="card-desc">
-                Report potholes, broken<br>
-                streetlights, graffiti, and<br>
-                other municipal issues in<br>
+                Report potholes, broken
+                streetlights, graffiti, and
+                other municipal issues in
                 your neighborhood.
             </p>
             <button class="card-btn primary" id="ReportIssueBtn">Get Started</button>
@@ -27,42 +30,42 @@
             <div class="icon-bg blue">
                 <img src="~/images/icons/ic_calendar.svg" alt="Calendar Icon" width="32" height="32" />
             </div>
-            <h3 class="card-title ">Local Events</h3>
+            <h3 class="card-title">Local Events</h3>
             <p class="card-desc ">
-                Discover upcoming<br>
-                community events, town<br>
-                halls, and public meetings<br>
+                Discover upcoming
+                community events, town
+                halls, and public meetings
                 in your area.
             </p>
             <button class="card-btn primary" id="LocalEventsBtn">Get Started</button>
         </div>
-        <div class="card service-request">
-            <div class="icon-bg gray">
+        <div class="card report-issues">
+            <div class="icon-bg blue">
                 <img src="~/images/icons/ic_service_request.svg" alt="Service Request Icon" width="32" height="32" />
             </div>
-            <h3 class="card-title gray">Service Request<br>Status</h3>
-            <p class="card-desc gray">
-                Track the progress of your<br>
-                submitted service<br>
-                requests and view<br>
+            <h3 class="card-title">Service Request Status</h3>
+            <p class="card-desc">
+                Track the progress of your
+                submitted service
+                requests and view
                 resolution updates.
             </p>
-            <button class="card-btn secondary">Coming Soon</button>
+            <button class="card-btn primary" id="ServiceRequestBtn">Get Started</button>
         </div>
     </section>
     <section class="section stats">
         <h3 class="stats-title">Service Statistics</h3>
         <div class="stats-row">
             <div class="stats-card">
-                <div class="stats-value">1,247</div>
+                <div class="stats-value">@Model.IssuesResolved.ToString("N0")</div>
                 <div class="stats-label">Issues Resolved</div>
             </div>
             <div class="stats-card">
-                <div class="stats-value">89</div>
+                <div class="stats-value">@Model.ActiveRequests</div>
                 <div class="stats-label">Active Requests</div>
             </div>
             <div class="stats-card">
-                <div class="stats-value">24h</div>
+                <div class="stats-value">@Model.AverageResponseTime</div>
                 <div class="stats-label">Avg Response Time</div>
             </div>
         </div>

@@ -8,10 +8,35 @@ namespace Municipal_Servcies_Portal.Data
     {
         public static async Task SeedAsync(AppDbContext context)
         {
-            // Check if data already exists
-            if (await context.Events.AnyAsync() || await context.Announcements.AnyAsync())
+            // First, update any existing issues that don't have Priority set
+            var issuesWithoutPriority = await context.Issues
+                .Where(i => i.Priority == 0 || i.Priority < 1 || i.Priority > 5)
+                .ToListAsync();
+            
+            if (issuesWithoutPriority.Any())
             {
-                return; // Database already seeded
+                foreach (var issue in issuesWithoutPriority)
+                {
+                    issue.Priority = 3; // Set default priority to Medium
+                }
+                await context.SaveChangesAsync();
+            }
+            
+            // Check if service requests with dependencies already exist (for testing POE data structures)
+            var serviceRequestsSeeded = await context.Issues
+                .AnyAsync(i => i.DependenciesJson != null && i.DependenciesJson != "");
+            
+            if (!serviceRequestsSeeded)
+            {
+                // Only seed service requests if they don't exist yet
+                await SeedServiceRequestsAsync(context);
+            }
+            
+            // Check if events/announcements already seeded
+            var eventsSeeded = await context.Events.AnyAsync();
+            if (eventsSeeded)
+            {
+                return; // Don't duplicate events/announcements
             }
 
             // Seed Events
@@ -371,6 +396,271 @@ namespace Municipal_Servcies_Portal.Data
 
             await context.Events.AddRangeAsync(events);
             await context.Announcements.AddRangeAsync(announcements);
+            await context.SaveChangesAsync();
+        }
+        
+        /// <summary>
+        /// Seeds comprehensive service requests with various priorities, statuses, and dependencies
+        /// This data is used to test BST, MinHeap, and Graph data structures
+        /// </summary>
+        private static async Task SeedServiceRequestsAsync(AppDbContext context)
+        {
+            var issues = new List<Issue>
+            {
+                // CRITICAL PRIORITY (Priority 1) - Most urgent issues
+                new Issue
+                {
+                    Location = "Main Street & 1st Avenue Intersection",
+                    Category = "Roads",
+                    Description = "Major water main break causing road flooding and traffic closure. Immediate attention required to prevent further damage to infrastructure.",
+                    Priority = 1,
+                    Status = "InProgress",
+                    DateReported = DateTime.Now.AddDays(-1),
+                    IsActive = true,
+                    NotificationEmail = "emergency@city.gov"
+                },
+                new Issue
+                {
+                    Location = "Springfield Elementary School - Cafeteria",
+                    Category = "Health & Safety",
+                    Description = "Gas leak detected in school cafeteria kitchen. Building evacuated. Emergency crews on site.",
+                    Priority = 1,
+                    Status = "InProgress",
+                    DateReported = DateTime.Now.AddHours(-5),
+                    IsActive = true,
+                    NotificationEmail = "safety@springfield.edu"
+                },
+                new Issue
+                {
+                    Location = "City Hall - Server Room",
+                    Category = "Infrastructure",
+                    Description = "Fire suppression system activated in main server room. All city services temporarily offline.",
+                    Priority = 1,
+                    Status = "Completed",
+                    DateReported = DateTime.Now.AddDays(-3),
+                    IsActive = true
+                },
+                
+                // HIGH PRIORITY (Priority 2) - Urgent issues affecting many residents
+                new Issue
+                {
+                    Location = "Oak Park - Children's Playground",
+                    Category = "Parks",
+                    Description = "Multiple pieces of playground equipment damaged and unsafe. Swing set chains broken, slide has sharp edges. Area cordoned off.",
+                    Priority = 2,
+                    Status = "Pending",
+                    DateReported = DateTime.Now.AddDays(-2),
+                    IsActive = true,
+                    NotificationEmail = "parks@city.gov",
+                    NotificationPhone = "555-0123"
+                },
+                new Issue
+                {
+                    Location = "Riverside District - Blocks 400-500",
+                    Category = "Utilities",
+                    Description = "Power outage affecting approximately 150 households. Transformer issue suspected. Utility company has been notified.",
+                    Priority = 2,
+                    Status = "InProgress",
+                    DateReported = DateTime.Now.AddHours(-12),
+                    IsActive = true
+                },
+                new Issue
+                {
+                    Location = "Downtown - 5th Street Bridge",
+                    Category = "Infrastructure",
+                    Description = "Structural cracks observed on bridge support columns during routine inspection. Load capacity reduced, weight restrictions implemented.",
+                    Priority = 2,
+                    Status = "Pending",
+                    DateReported = DateTime.Now.AddDays(-1),
+                    IsActive = true,
+                    DependenciesJson = "[1]" // Depends on water main fix (Issue #1)
+                },
+                new Issue
+                {
+                    Location = "Maple Avenue - 200 Block",
+                    Category = "Sanitation",
+                    Description = "Sewage backup affecting 8 residential properties. Overflow into street. Health hazard reported.",
+                    Priority = 2,
+                    Status = "InProgress",
+                    DateReported = DateTime.Now.AddDays(-1),
+                    IsActive = true
+                },
+                
+                // MEDIUM PRIORITY (Priority 3) - Standard issues
+                new Issue
+                {
+                    Location = "Lincoln Street - Near City Library",
+                    Category = "Roads",
+                    Description = "Large pothole (approx. 3ft diameter, 8 inches deep) causing vehicle damage. Multiple reports received from residents.",
+                    Priority = 3,
+                    Status = "Pending",
+                    DateReported = DateTime.Now.AddDays(-4),
+                    IsActive = true,
+                    NotificationEmail = "publicworks@city.gov"
+                },
+                new Issue
+                {
+                    Location = "Washington Park - East Entrance",
+                    Category = "Lighting",
+                    Description = "Three street lights not functioning. Area poorly lit after dark, safety concern for evening joggers and dog walkers.",
+                    Priority = 3,
+                    Status = "Pending",
+                    DateReported = DateTime.Now.AddDays(-3),
+                    IsActive = true
+                },
+                new Issue
+                {
+                    Location = "Grove Street - Residential Area",
+                    Category = "Trees",
+                    Description = "Large oak tree branch hanging dangerously low over sidewalk after recent storm. Risk of falling on pedestrians.",
+                    Priority = 3,
+                    Status = "Completed",
+                    DateReported = DateTime.Now.AddDays(-7),
+                    IsActive = true
+                },
+                new Issue
+                {
+                    Location = "Community Center - Main Hall",
+                    Category = "Buildings",
+                    Description = "HVAC system malfunctioning. Temperature inconsistent. Scheduled events may need relocation if not fixed soon.",
+                    Priority = 3,
+                    Status = "InProgress",
+                    DateReported = DateTime.Now.AddDays(-2),
+                    IsActive = true
+                },
+                new Issue
+                {
+                    Location = "Highland Avenue - Bus Stop #47",
+                    Category = "Public Transit",
+                    Description = "Bus shelter damaged, glass panels broken. Graffiti on remaining walls. Bench unstable.",
+                    Priority = 3,
+                    Status = "Pending",
+                    DateReported = DateTime.Now.AddDays(-5),
+                    IsActive = true,
+                    DependenciesJson = "[6]" // Related to bridge work (Issue #6)
+                },
+                
+                // LOW PRIORITY (Priority 4) - Non-urgent issues
+                new Issue
+                {
+                    Location = "City Park - South Trail",
+                    Category = "Parks",
+                    Description = "Trail signage faded and difficult to read. Trail markers need repainting for better visibility.",
+                    Priority = 4,
+                    Status = "Pending",
+                    DateReported = DateTime.Now.AddDays(-10),
+                    IsActive = true
+                },
+                new Issue
+                {
+                    Location = "Pine Street - Commercial District",
+                    Category = "Parking",
+                    Description = "Parking meter #237 accepting payment but not registering time. Residents complaining about unfair tickets.",
+                    Priority = 4,
+                    Status = "Pending",
+                    DateReported = DateTime.Now.AddDays(-6),
+                    IsActive = true
+                },
+                new Issue
+                {
+                    Location = "Memorial Square - Veterans Monument",
+                    Category = "Maintenance",
+                    Description = "Monument plaque needs cleaning. Flower beds need weeding. General landscaping maintenance required.",
+                    Priority = 4,
+                    Status = "Completed",
+                    DateReported = DateTime.Now.AddDays(-15),
+                    IsActive = true
+                },
+                new Issue
+                {
+                    Location = "Jefferson Street - Between 2nd & 3rd Ave",
+                    Category = "Signage",
+                    Description = "Stop sign partially obscured by tree branches. Needs trimming for better visibility to drivers.",
+                    Priority = 4,
+                    Status = "InProgress",
+                    DateReported = DateTime.Now.AddDays(-8),
+                    IsActive = true
+                },
+                
+                // VERY LOW PRIORITY (Priority 5) - Cosmetic or minor issues
+                new Issue
+                {
+                    Location = "City Hall - Main Entrance",
+                    Category = "Aesthetics",
+                    Description = "Flower planters at entrance need seasonal replanting. Current flowers wilting.",
+                    Priority = 5,
+                    Status = "Pending",
+                    DateReported = DateTime.Now.AddDays(-14),
+                    IsActive = true
+                },
+                new Issue
+                {
+                    Location = "Riverside Walking Path - Mile Marker 2",
+                    Category = "Parks",
+                    Description = "Bench has chipped paint. Still functional but could use refinishing for aesthetic purposes.",
+                    Priority = 5,
+                    Status = "Pending",
+                    DateReported = DateTime.Now.AddDays(-20),
+                    IsActive = true
+                },
+                new Issue
+                {
+                    Location = "Town Square - Information Kiosk",
+                    Category = "Information",
+                    Description = "Community bulletin board outdated. Old event flyers from last month still posted.",
+                    Priority = 5,
+                    Status = "Completed",
+                    DateReported = DateTime.Now.AddDays(-12),
+                    IsActive = true
+                },
+                new Issue
+                {
+                    Location = "Library - Front Steps",
+                    Category = "Maintenance",
+                    Description = "Handrail slightly loose. Not dangerous but could be tightened for better stability.",
+                    Priority = 5,
+                    Status = "Pending",
+                    DateReported = DateTime.Now.AddDays(-18),
+                    IsActive = true
+                },
+                
+                // Additional issues with complex dependencies for Graph testing
+                new Issue
+                {
+                    Location = "Downtown Infrastructure Zone",
+                    Category = "Planning",
+                    Description = "Comprehensive assessment needed before starting multiple repair projects in downtown area.",
+                    Priority = 2,
+                    Status = "Completed",
+                    DateReported = DateTime.Now.AddDays(-5),
+                    IsActive = true,
+                    DependenciesJson = "[1,6,7]" // Related to water main, bridge, and sewage
+                },
+                new Issue
+                {
+                    Location = "Main Street Corridor - Full Length",
+                    Category = "Roads",
+                    Description = "Street resurfacing project planned. Dependent on completion of utility work and infrastructure repairs.",
+                    Priority = 3,
+                    Status = "Pending",
+                    DateReported = DateTime.Now.AddDays(-4),
+                    IsActive = true,
+                    DependenciesJson = "[1,21]" // Depends on water main and planning assessment
+                },
+                new Issue
+                {
+                    Location = "East Side Development Area",
+                    Category = "Development",
+                    Description = "New residential area utilities installation. Requires coordination with multiple ongoing projects.",
+                    Priority = 3,
+                    Status = "Pending",
+                    DateReported = DateTime.Now.AddDays(-3),
+                    IsActive = true,
+                    DependenciesJson = "[5,7,22]" // Related to power, sewage, and road work
+                }
+            };
+            
+            await context.Issues.AddRangeAsync(issues);
             await context.SaveChangesAsync();
         }
     }

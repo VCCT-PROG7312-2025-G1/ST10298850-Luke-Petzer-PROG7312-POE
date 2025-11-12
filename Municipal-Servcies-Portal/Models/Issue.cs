@@ -78,5 +78,38 @@ namespace Municipal_Servcies_Portal.Models
         public string? AssignedTo { get; set; }
         
         public bool IsActive { get; set; } = true;
+// Add after existing properties (Status, LastUpdated, etc.)
+        
+        /// <summary>
+        /// Priority level for the issue (1=Highest, 5=Lowest).
+        /// Required for MinHeap (Priority Queue) implementation.
+        /// </summary>
+        [Required]
+        [Range(1, 5)]
+        public int Priority { get; set; } = 3; // Default to Medium priority
+        
+        /// <summary>
+        /// Stores JSON list of other Issue IDs that this issue depends on.
+        /// Required for Graph (dependency tracking) implementation.
+        /// Example: "[8, 12]"
+        /// </summary>
+        [MaxLength(1000)]
+        public string? DependenciesJson { get; set; }
+        
+        /// <summary>
+        /// Not-mapped helper to work with dependencies as a list.
+        /// Used to build the Graph for complex relationships.
+        /// </summary>
+        [NotMapped]
+        public List<int> Dependencies
+        {
+            get => string.IsNullOrEmpty(DependenciesJson)
+                ? new List<int>()
+                : System.Text.Json.JsonSerializer.Deserialize<List<int>>(DependenciesJson) ?? new List<int>();
+            set => DependenciesJson = (value != null && value.Any())
+                ? System.Text.Json.JsonSerializer.Serialize(value)
+                : null;
+        }
+        
     }
 }

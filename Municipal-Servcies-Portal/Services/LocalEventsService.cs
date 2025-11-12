@@ -1,287 +1,174 @@
-using Municipal_Servcies_Portal.Models;
-using Municipal_Servcies_Portal.Data;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Municipal_Servcies_Portal.Data;
+using Municipal_Servcies_Portal.Models;
+using Municipal_Servcies_Portal.Repositories;
+using Municipal_Servcies_Portal.ViewModels;
 
 namespace Municipal_Servcies_Portal.Services
 {
     public class LocalEventsService : ILocalEventsService
     {
+        private readonly IEventRepository _eventRepository;
         private readonly AppDbContext _context;
+        private readonly IMapper _mapper;
         private readonly SearchHistoryService _searchHistoryService;
-        
-        // Data structures for efficient event management
-        private SortedDictionary<DateTime, List<Event>> _eventsByDate = new();
-        private Dictionary<string, List<Event>> _eventsByCategory = new();
-        private HashSet<string> _categories = new();
-        private PriorityQueue<Event, DateTime> _upcomingEventsQueue = new();
-        private HashSet<DateTime> _uniqueEventDates = new();
-        private Stack<Event> _recentlyViewedEvents = new();
 
-        public LocalEventsService(AppDbContext context, SearchHistoryService searchHistoryService)
+        public LocalEventsService(
+            IEventRepository eventRepository, 
+            AppDbContext context, 
+            IMapper mapper,
+            SearchHistoryService searchHistoryService)
         {
+            _eventRepository = eventRepository;
             _context = context;
+            _mapper = mapper;
             _searchHistoryService = searchHistoryService;
         }
 
-        // Load events into data structures
-        private async Task LoadEventsIntoStructuresAsync()
+        public async Task<LocalEventsViewModel> GetEventsPageViewModelAsync(
+            string? searchTerm, 
+            string? category, 
+            DateTime? date)
         {
-            // Always reload to ensure fresh data for recommendations
-            // Clear existing data structures
-            _eventsByDate.Clear();
-            _eventsByCategory.Clear();
-            _categories.Clear();
-            _upcomingEventsQueue.Clear();
-            _uniqueEventDates.Clear();
-
-            var events = await _context.Events.Where(e => e.IsActive).ToListAsync();
-
-            foreach (var ev in events)
+            // Track search in history for recommendations
+            // Only track if user actually searched for something
+            if (!string.IsNullOrEmpty(searchTerm) || !string.IsNullOrEmpty(category) || date.HasValue)
             {
-                // SortedDictionary by StartDate
-                if (!_eventsByDate.ContainsKey(ev.StartDate.Date))
-                    _eventsByDate[ev.StartDate.Date] = new List<Event>();
-                _eventsByDate[ev.StartDate.Date].Add(ev);
-
-                // Dictionary by Category
-                if (!_eventsByCategory.ContainsKey(ev.Category))
-                    _eventsByCategory[ev.Category] = new List<Event>();
-                _eventsByCategory[ev.Category].Add(ev);
-
-                // HashSet for categories
-                _categories.Add(ev.Category);
-
-                // HashSet for unique event dates
-                _uniqueEventDates.Add(ev.StartDate.Date);
-
-                // PriorityQueue for upcoming events (future dates only)
-                if (ev.StartDate >= DateTime.Now)
-                {
-                    _upcomingEventsQueue.Enqueue(ev, ev.StartDate);
-                }
+                _searchHistoryService.AddSearch(searchTerm, category, date);
             }
-        }
 
-        //Basic retrieval methods
-        public async Task<IEnumerable<Event>> GetAllEventsAsync()
-        {
-            return await _context.Events
-                .Where(e => e.IsActive)
-                .OrderBy(e => e.StartDate)
-                .ToListAsync();
-        }
+            // Fix date filtering: if date is provided, search from that date onwards (not exact match)
+            DateTime? startDate = date;
+            DateTime? endDate = null; // No end date means "all future events from start date"
 
-        public async Task<IEnumerable<Announcement>> GetAllAnnouncementsAsync()
-        {
-            return await _context.Announcements
+            // Get filtered events based on search parameters
+            var events = await _eventRepository.SearchEventsAsync(
+                searchTerm ?? string.Empty, 
+                category, 
+                startDate, 
+                endDate);
+
+            // Get all categories for filter dropdown
+            var allEvents = await _eventRepository.GetAllAsync();
+            var categories = allEvents
+                .Select(e => e.Category)
+                .Where(c => !string.IsNullOrWhiteSpace(c))
+                .Distinct()
+                .OrderBy(c => c)
+                .ToList();
+
+            // Get announcements
+            var announcements = await _context.Announcements
                 .Where(a => a.IsActive)
                 .OrderByDescending(a => a.DatePosted)
-                .Take(3)
+                .Take(5)
                 .ToListAsync();
-        }
 
-        // Data structure based methods
-        public async Task<IEnumerable<Event>> GetUpcomingEventsAsync()
-        {
-            await LoadEventsIntoStructuresAsync();
-            
-            var result = new List<Event>();
-            var tempQueue = new PriorityQueue<Event, DateTime>(_upcomingEventsQueue.UnorderedItems);
+            // Get personalized recommended events based on search history
+            var recommendedEvents = await GetRecommendedEventsAsync();
 
-            while (tempQueue.Count > 0)
+            return new LocalEventsViewModel
             {
-                result.Add(tempQueue.Dequeue());
-            }
-            
-            return result;
+                SearchTerm = searchTerm,
+                Category = category,
+                StartDate = date,
+                Events = events.ToList(),
+                Categories = categories,
+                Announcements = announcements,
+                RecommendedEvents = recommendedEvents.ToList()
+            };
         }
 
-        public async Task<IEnumerable<Event>> GetEventsByCategoryAsync(string category)
-        {
-            await LoadEventsIntoStructuresAsync();
-            
-            if (_eventsByCategory.TryGetValue(category, out var events))
-                return events;
-            
-            return Enumerable.Empty<Event>();
-        }
-
-        public async Task<IEnumerable<string>> GetCategoriesAsync()
-        {
-            await LoadEventsIntoStructuresAsync();
-            return _categories.OrderBy(c => c);
-        }
-
-        // Public method to get unique event dates
-        public async Task<IEnumerable<DateTime>> GetUniqueEventDatesAsync()
-        {
-            await LoadEventsIntoStructuresAsync();
-            return _uniqueEventDates;
-        }
-
-        // Public method to get recently viewed events (top N)
-        public IEnumerable<Event> GetRecentlyViewedEvents(int count = 5)
-        {
-            return _recentlyViewedEvents.Take(count);
-        }
-
-        // Call this when an event is viewed
-        public void RecordEventViewed(Event ev)
-        {
-            _recentlyViewedEvents.Push(ev);
-            // Optionally limit stack size
-            if (_recentlyViewedEvents.Count > 20)
-            {
-                var tempStack = new Stack<Event>(_recentlyViewedEvents.Reverse().Skip(1));
-                _recentlyViewedEvents = tempStack;
-            }
-        }
-
-        // Search and filter functionality
-        
         /// <summary>
-        /// Searches for events based on multiple filter criteria
-        /// This method queries the database and applies filters sequentially
+        /// Generate personalized event recommendations based on user's search history
+        /// Uses simple scoring algorithm: more recent searches and matching categories get higher priority
         /// </summary>
-        /// <param name="name">Event name/title to search for (partial match, case-insensitive)</param>
-        /// <param name="category">Exact category match (case-insensitive)</param>
-        /// <param name="startDate">Filter events starting on or after this date</param>
-        /// <param name="endDate">Filter events starting on or before this date (optional)</param>
-        /// <returns>List of events matching all provided criteria</returns>
-        public async Task<IEnumerable<Event>> SearchEventsAsync(string? name, string? category, DateTime? startDate, DateTime? endDate)
+        private async Task<IEnumerable<Event>> GetRecommendedEventsAsync()
         {
-            // Start with a queryable collection from the database
-            var query = _context.Events.AsQueryable();
-
-            // Apply name filter if provided
-            if (!string.IsNullOrEmpty(name))
-            {
-                // Convert to lowercase for case-insensitive search that works with SQL
-                query = query.Where(e => e.Title.ToLower().Contains(name.ToLower()));
-            }
-
-            // Apply category filter if provided
-            if (!string.IsNullOrEmpty(category))
-            {
-                query = query.Where(e => e.Category.ToLower() == category.ToLower());
-            }
-
-            // Show events FROM startDate onwards (ignore time component)
-            if (startDate.HasValue)
-            {
-                var dateOnly = startDate.Value.Date;
-                query = query.Where(e => e.StartDate.Date >= dateOnly);
-            }
-
-            // Only apply endDate if provided (currently null from controller for open-ended date range)
-            if (endDate.HasValue)
-            {
-                var dateOnly = endDate.Value.Date;
-                query = query.Where(e => e.StartDate.Date <= dateOnly);
-            }
-
-            // Only show active events
-            query = query.Where(e => e.IsActive);
-
-            // Execute the query and return the results ordered by date
-            return await query.OrderBy(e => e.StartDate).ToListAsync();
-        }
-
-
-        // Record a user search for recommendations
-        public Task RecordSearchAsync(string? searchName, string? category, DateTime? date, DateTime? endDate)
-        {
-            // Track all search parameters including text searches
-            _searchHistoryService.AddSearch(searchName, category, date);
-            return Task.CompletedTask;
-        }
-
-        // Recommend events based on most frequent category/date/search terms in search history
-        public async Task<IEnumerable<Event>> GetRecommendedEventsAsync()
-        {
-            await LoadEventsIntoStructuresAsync();
+            // Get user's search history
             var searchHistory = _searchHistoryService.GetSearchHistory();
 
-            if (searchHistory.Count == 0)
+            // If no search history, just return upcoming events
+            if (!searchHistory.Any())
             {
-                // Fallback: recommend upcoming events
-                return _upcomingEventsQueue.UnorderedItems
-                    .Select(x => x.Element)
-                    .OrderBy(e => e.StartDate)
-                    .Take(3)
-                    .ToList();
+                return await _eventRepository.GetUpcomingEventsAsync();
             }
 
-            // Analyze search history including search text
-            var categoryCounts = new Dictionary<string, int>();
-            var searchTerms = new List<string>();
+            // Get all upcoming events
+            var allUpcomingEvents = await _eventRepository.GetUpcomingEventsAsync();
+            var eventsList = allUpcomingEvents.ToList();
 
-            foreach (var item in searchHistory)
+            // Score each event based on search history
+            var scoredEvents = new List<(Event evt, int score)>();
+
+            foreach (var evt in eventsList)
             {
-                // Track categories
-                if (!string.IsNullOrEmpty(item.Category))
+                int score = 0;
+
+                // Check each search in history (newer searches = higher weight)
+                for (int i = 0; i < searchHistory.Count; i++)
                 {
-                    if (!categoryCounts.ContainsKey(item.Category))
-                        categoryCounts[item.Category] = 0;
-                    categoryCounts[item.Category]++;
+                    var search = searchHistory[i];
+                    // Weight: newer searches get higher multiplier
+                    int weight = i + 1; 
+
+                    // Match category (worth 3 points per weight)
+                    if (!string.IsNullOrEmpty(search.Category) && 
+                        evt.Category.Equals(search.Category, StringComparison.OrdinalIgnoreCase))
+                    {
+                        score += 3 * weight;
+                    }
+
+                    // Match search text in title or description (worth 2 points per weight)
+                    if (!string.IsNullOrEmpty(search.SearchText))
+                    {
+                        if (evt.Title.Contains(search.SearchText, StringComparison.OrdinalIgnoreCase) ||
+                            evt.Description.Contains(search.SearchText, StringComparison.OrdinalIgnoreCase))
+                        {
+                            score += 2 * weight;
+                        }
+                    }
+
+                    // Match date proximity (worth 1 point per weight if within 7 days)
+                    if (search.Date.HasValue)
+                    {
+                        var daysDiff = Math.Abs((evt.StartDate.Date - search.Date.Value.Date).Days);
+                        if (daysDiff <= 7)
+                        {
+                            score += weight;
+                        }
+                    }
                 }
 
-                // Track search terms for keyword-based recommendations
-                if (!string.IsNullOrEmpty(item.SearchText))
-                {
-                    searchTerms.Add(item.SearchText.ToLower());
-                }
+                scoredEvents.Add((evt, score));
             }
-            
-            // Get most frequent category
-            var topCategory = categoryCounts.OrderByDescending(x => x.Value).FirstOrDefault().Key;
 
-            // Build recommendations
-            var recommended = new List<Event>();
-            
-            // Strategy 1: Recommend based on most searched category
-            if (!string.IsNullOrEmpty(topCategory) && _eventsByCategory.ContainsKey(topCategory))
+            // Return top scored events, or if no matches, return upcoming events
+            var topRecommended = scoredEvents
+                .Where(x => x.score > 0)
+                .OrderByDescending(x => x.score)
+                .ThenBy(x => x.evt.StartDate)
+                .Select(x => x.evt)
+                .Take(6)
+                .ToList();
+
+            // If we got recommendations, return them
+            if (topRecommended.Any())
             {
-                recommended.AddRange(_eventsByCategory[topCategory]
-                    .Where(e => e.StartDate >= DateTime.Now)
-                    .OrderBy(e => e.StartDate)
-                    .Take(3));
+                return topRecommended;
             }
-            
-            // Strategy 2: Recommend events matching recent search terms
-            if (recommended.Count < 3 && searchTerms.Any())
-            {
-                var existingIds = recommended.Select(e => e.Id).ToHashSet();
-                var keywordMatches = await _context.Events
-                    .Where(e => e.IsActive && e.StartDate >= DateTime.Now && !existingIds.Contains(e.Id))
-                    .ToListAsync();
-                
-                // Filter events that match any search term
-                var matchingEvents = keywordMatches
-                    .Where(e => searchTerms.Any(term => 
-                        e.Title.ToLower().Contains(term) || 
-                        e.Description.ToLower().Contains(term) ||
-                        e.Category.ToLower().Contains(term)))
-                    .OrderBy(e => e.StartDate)
-                    .Take(3 - recommended.Count);
-                
-                recommended.AddRange(matchingEvents);
-            }
-            
-            // Strategy 3: Fallback to general upcoming events
-            if (recommended.Count < 3)
-            {
-                var existingIds = recommended.Select(e => e.Id).ToHashSet();
-                var fallback = _upcomingEventsQueue.UnorderedItems
-                    .Select(x => x.Element)
-                    .Where(e => !existingIds.Contains(e.Id))
-                    .OrderBy(e => e.StartDate)
-                    .Take(3 - recommended.Count)
-                    .ToList();
-                recommended.AddRange(fallback);
-            }
-            
-            return recommended.Distinct().Take(3).ToList();
+
+            // Otherwise, just return upcoming events as fallback
+            return eventsList.Take(6);
+        }
+
+        public async Task<LocalEventsViewModel?> GetEventByIdAsync(int id)
+        {
+            var eventEntity = await _eventRepository.GetByIdAsync(id);
+            return eventEntity != null 
+                ? _mapper.Map<LocalEventsViewModel>(eventEntity) 
+                : null;
         }
     }
 }

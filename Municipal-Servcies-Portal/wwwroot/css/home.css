@@ -14,12 +14,17 @@ body {
     border-radius: 0;
 }
 
-.section.header {
+/* -- CHANGED -- */
+/* Adjusted to fit within main container padding (896px - 32px padding = 864px available) */
+.section {
     width: 100%;
-    max-width: 832px;
+    max-width: 100%; /* Changed from 864px to fit within padded container */
     margin: 0 auto 32px auto;
-    padding: 24px 0 0 0;
     position: static;
+}
+
+.section.header {
+    padding: 24px 0 0 0;
 }
 
 .welcome-title {
@@ -45,31 +50,42 @@ body {
 }
 
 .section.cards {
-    width: 100%;
-    max-width: 832px;
-    margin: 0 auto 32px auto;
     display: flex;
     gap: 24px;
-    flex-wrap: wrap;
+     flex-wrap: nowrap; /* Changed from wrap to prevent cards from wrapping to next line */
     justify-content: center;
-    position: static;
 }
 
 .card {
-    width: 100%;
-    max-width: 261px;
-    min-width: 220px;
+    /* -- CHANGED -- */
+    /* Removed width: 100% and adjusted to fit 3 cards exactly in a row */
+    /* Available: 864px - 48px gaps = 816px ÷ 3 = 272px per card */
+    flex: 0 0 auto;
+    max-width: 272px;
+    min-width: 272px;
     height: auto;
     background: #FFFFFF;
     border: 2px solid #E5E7EB;
     box-shadow: 0px 1px 2px rgba(0,0,0,0.05);
     border-radius: 12px;
     box-sizing: border-box;
-    padding: 0;
-    position: static;
+    /* -- CHANGED -- */
+    /* Switched to a single, consistent padding value */
+    padding: 32px; /* Was 34px 34px 24px 34px */
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
+    /* -- ADDED -- */
+    /* Smooth transition for hover effects */
+    transition: all 0.3s ease-in-out;
+}
+
+/* -- ADDED -- */
+/* Hover effect for all cards */
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 5px 15px rgba(0,0,0,0.1), 0px 10px 20px rgba(0,0,0,0.08);
 }
 
 .card.report-issues {
@@ -85,7 +101,7 @@ body {
 .icon-bg {
     width: 64px;
     height: 64px;
-    margin: 34px auto 0 auto;
+    margin: 0;
     border-radius: 9999px;
     display: flex;
     align-items: center;
@@ -97,8 +113,7 @@ body {
 
 .card-title {
     width: 100%;
-    max-width: 193px;
-    margin: 24px auto 0 auto;
+    margin: 24px 0 0 0;
     font-weight: 600;
     font-size: 20px;
     line-height: 23px;
@@ -110,8 +125,9 @@ body {
 
 .card-desc {
     width: 100%;
-    max-width: 193px;
-    margin: 16px auto 0 auto;
+    /* -- CHANGED -- */
+    /* Added margin-bottom to ensure minimum space above button */
+    margin: 16px 0 24px 0;
     font-weight: 400;
     font-size: 16px;
     line-height: 19px;
@@ -123,9 +139,9 @@ body {
 
 .card-btn {
     width: 100%;
-    max-width: 193px;
     height: 48px;
-    margin: 32px auto 24px auto;
+    /* This margin is key: 'auto' top margin pushes it to the bottom */
+    margin: auto 0 0 0;
     border-radius: 8px;
     font-weight: 500;
     font-size: 16px;
@@ -133,6 +149,9 @@ body {
     text-align: center;
     border: none;
     cursor: pointer;
+    /* -- ADDED -- */
+    /* Smooth transition for hover effects */
+    transition: all 0.3s ease-in-out;
 }
 
 .card-btn.primary {
@@ -140,25 +159,34 @@ body {
     color: #fff;
 }
 
+/* -- ADDED -- */
+.card-btn.primary:hover {
+    background: #1D4ED8; /* Brighter blue */
+    box-shadow: 0 4px 10px rgba(30, 64, 175, 0.25);
+}
+
 .card-btn.secondary {
     background: #D1D5DB;
     color: #6B7280;
 }
 
+/* -- ADDED -- */
+.card-btn.secondary:hover {
+    background: #9CA3AF;
+    color: #4B5563;
+}
+
 .section.stats {
-    width: 100%;
-    max-width: 832px;
-    margin: 0 auto 32px auto;
     background: #fff;
     box-shadow: 0px 4px 6px rgba(0,0,0,0.1), 0px 10px 15px rgba(0,0,0,0.1);
     border-radius: 12px;
     padding: 32px 0;
-    position: static;
 }
 
 .stats-title {
     width: 100%;
-    max-width: 768px;
+    /* -- CHANGED -- */
+    /* Removed max-width to use full available space */
     margin: 0 auto 24px auto;
     font-weight: 600;
     font-size: 20px;
@@ -169,17 +197,21 @@ body {
 
 .stats-row {
     width: 100%;
-    max-width: 768px;
+    /* -- CHANGED -- */
+    /* Removed max-width and changed to nowrap to keep stats in single row */
     margin: 0 auto;
     display: flex;
     gap: 24px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap; /* Changed from wrap to prevent wrapping */
     justify-content: center;
 }
 
 .stats-card {
-    width: 100%;
-    max-width: 240px;
+    /* -- CHANGED -- */
+    /* Adjusted to fit 3 cards in a row: (864px - 48px gaps) / 3 = 272px per card */
+    flex: 0 0 auto;
+    max-width: 272px;
+    min-width: 272px;
     height: 68px;
     text-align: center;
     margin-bottom: 16px;
@@ -209,14 +241,19 @@ body {
         max-width: 100%;
         padding: 0;
     }
+    .section.cards, .stats-row {
+        flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    }
     .stats-title {
         font-size: 18px;
     }
     .card {
         max-width: 48%;
+        min-width: auto;
     }
     .stats-card {
         max-width: 48%;
+        min-width: auto;
     }
 }
 
@@ -230,6 +267,7 @@ body {
     }
     .card {
         max-width: 100%;
+        min-width: auto;
     }
     .stats-row {
         flex-direction: column;
@@ -237,6 +275,7 @@ body {
     }
     .stats-card {
         max-width: 100%;
+        min-width: auto;
     }
 }
 
