@@ -6,19 +6,6 @@ This is my Portfolio of Evidence for PROG7312, an ASP.NET Core MVC application f
 
 ---
 
-## 📚 Table of Contents
-
-- [Repository & Video Links](#-repository--video-links)
-- [Project Features](#-project-features)
-- [Why SQLite?](#-why-sqlite)
-- [Technologies & Patterns](#-technologies--patterns)
-- [Project Structure](#-project-structure)
-- [Setup & Installation](#-setup--installation)
-- [Usage Guide](#-usage-guide)
-- [Part 3: Data Structures Explained](#-part-3-data-structures-explained)
-
----
-
 ## 🔗 Repository & Video Links
 
 **GitHub Repository:**  
@@ -33,13 +20,13 @@ https://youtu.be/Y9FKudbk_m0
 
 This application is built in three main parts:
 
-### 1️⃣ Report Issues
+### 1. Report Issues
 This feature allows users to submit service requests (like potholes, graffiti, or water leaks) to the municipality. The form collects a location, category, description, and allows for file uploads. All submissions are saved to the database.
 
-### 2️⃣ Local Events
+### 2. Local Events
 This page displays upcoming events and announcements. I built a search and filter system for this, along with a recommendation feature that suggests other events based on what the user has searched for in their current session.
 
-### 3️⃣ Track Service Requests (Part 3)
+### 3. Track Service Requests (Part 3)
 This is the main feature of the POE. It's a dashboard that allows users to track the status of all submitted issues. It uses several data structures to work efficiently:
 
 - **Binary Search Tree (BST):** Used for instant lookups when a user searches for a specific issue ID.
@@ -48,7 +35,7 @@ This is the main feature of the POE. It's a dashboard that allows users to track
 
 ---
 
-## 💾 Why SQLite?
+## Why SQLite?
 
 This project uses **SQLite** as its database. I chose it for several key reasons:
 
@@ -61,7 +48,7 @@ This project uses **SQLite** as its database. I chose it for several key reasons
 
 ---
 
-## 🛠️ Technologies & Patterns
+## Technologies & Patterns
 
 ### Core Technologies
 - **Framework:** ASP.NET Core MVC (.NET 8)
@@ -92,7 +79,7 @@ This project uses **SQLite** as its database. I chose it for several key reasons
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 I focused on a clean architecture. Here are the most important folders and what they do:
 
@@ -195,7 +182,7 @@ Municipal-Servcies-Portal/
 
 ---
 
-## 🚀 Setup & Installation
+## Setup & Installation
 
 ### Prerequisites
 - .NET 8.0 SDK
@@ -256,7 +243,7 @@ Navigate to the URL shown in the terminal (e.g., `https://localhost:5001`).
 
 ---
 
-## 📖 Usage Guide
+## Usage Guide
 
 ### Reporting an Issue
 
@@ -305,7 +292,7 @@ Navigate to the URL shown in the terminal (e.g., `https://localhost:5001`).
 
 ---
 
-## 🔍 Part 3: Data Structures Explained
+## Part 3: Data Structures Explained
 
 This section provides the in-depth explanation of *how* the data structures for Part 3 were implemented and *why* they were chosen.
 
@@ -452,12 +439,12 @@ The Graph provides an extremely fast `O(V + E)` way to traverse complex relation
 
 For this POE, I used in-memory data structures (loaded from the database at startup) instead of querying the database every time.
 
-**✅ Advantages:**
+** Advantages:**
 - **Performance:** All lookups, sorting, and traversals are "lightning-fast" because they happen in RAM, not on disk
 - **Meets POE:** It allowed me to demonstrate my custom-built BST, Heap, and Graph classes, which was a core requirement
 - **Reduced DB Load:** The database is only hit once on initialization, not every time a user searches or sorts
 
-**⚠️ Trade-offs (and real-world solutions):**
+** Trade-offs (and real-world solutions):**
 
 | Issue | Real-World Solution |
 |-------|---------------------|
@@ -466,14 +453,13 @@ For this POE, I used in-memory data structures (loaded from the database at star
 
 ---
 
-## 📝 License
+## License
 
 This project is an academic submission for PROG7312.
 
 ---
 
 **Author:** Luke Petzer  
-**Student Number:** ST10298850  
-**Institution:** The Independent Institute of Education  
+**Student Number:** ST10298850
 **Date:** November 2025
 
